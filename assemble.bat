@@ -1,3 +1,4 @@
+:: Initial author: yegorf1
 @echo off
  
 set Portable.RemoteTasks.Manager.Password=
