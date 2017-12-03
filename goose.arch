@@ -1,0 +1,84 @@
+architecture Goose {
+	/* 
+		PREFIX SYSTEM EXPLANATION:
+
+		Private internal names:
+			__m_<name> 		- memory range
+			__ef_<name> 	- encoded field
+			__es_<name>		- encoded sequence
+
+		Public names:
+			Registsers should be written in CAPS.
+			Mnemonics are written in lower case.
+	*/
+
+	registers:
+		storage A[32];												/* The only big-endian physical storage: [0 .. RSS .. 15 ][ 16 .. ERR .. 31] */
+
+		view SSZ = A[0..15];										/* A view for the Stack Size storage */
+		view ERR = A[16..31];										/* A view for the current ERRor code storage */
+
+		/*
+			ERROR CODES:
+				0 - No error
+
+		*/
+		
+	memory:
+		range __m_code[0x0000..0xFFFF] {
+			cell = 8;
+			endianess = big-endian;
+			granularity = 0;
+		}
+
+		range __m_consts[0x0000..0xFFFF] {
+			cell = 8;
+			endianess = big-endian;
+			granularity = 0;
+		}
+
+		range __m_data[0x0000..0xFFFF] {
+			cell = 8;
+			endianess = big-endian;
+			granularity = 0;
+		}
+
+		/* 
+			STACK MEMORY: stores data presented in stack. 
+
+			Each element has size of 2 bytes, so a pointer to the back element can be calculated like [__m_stack + (cell=16) * SSZ] 
+		*/
+		range __m_stack[0x0000..0xFFFF] {
+			cell = 16;
+			endianess = big-endian;
+			granularity = 16;
+		}
+
+	instructions:
+		/* ---------------- TYPE ENCODINGS ---------------- */
+
+		encode __ef_imm8	field = immediate[8] data;						/* generic data stored in 1 byte */
+		encode __ef_imm16	field = immediate[16] data;						/* generic data stored in 2 bytes */
+		encode __ef_imm32	field = immediate[32] data;						/* generic data stored in 4 bytes */
+		encode __ef_imm64	field = immediate[64] data;						/* generic data stored in 8 bytes */
+
+		encode __ef_off 	field = immediate[16] offset;					/* memory offset (maximum is 0xFFFF, what is the size of any memory range) */
+
+		encode __ef__reg	field = register {								/* REGISTERS BYTECODE DEFINITIONS */
+			SSZ = 00,														/* We'll leave some space for possible regiesters introduced in future */
+			ERR = 10
+		};
+
+		encode __ef_insType	field = cases {
+			basic = 00,
+			b = 01
+		};
+
+		/* -------------- BASIC INSTRUCTIONS -------------- */
+
+		instruction nop = { 1001 1000 };
+
+	mnemonics:
+
+		mnemonic nop();
+}
