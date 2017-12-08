@@ -1,3 +1,5 @@
+#pragma once
+
 class Arguments {
 public:
 	typedef uint8_t Mask;
