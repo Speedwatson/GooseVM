@@ -17,16 +17,16 @@ Arguments::Arguments(const std::vector<std::string>& argv) {
 		if (it->size() > 2 && it->substr(0, 2) == "--") {
 			Argument arg = str_to_arg(it->substr(2));
 			if (arg) mask |= arg;
-			else throw UnknownArgError("Unknown argument: " + *it);
+			else throw Error("Unknown argument: " + *it);
 		}
 		else if (it->size() > 1 && (it->at(0) == '-' || it->at(0) == '/')) {
 			for (int i = 1; i < it->size(); ++i) {
 				Argument arg = char_to_arg(it->at(i));
 				if (arg) mask |= arg;
-				else throw UnknownArgError("Unknown argument: '" + std::string(1, it->at(i)) + "' in " + *it);
+				else throw Error("Unknown argument: '" + std::string(1, it->at(i)) + "' in " + *it);
 			}
 		}
-		else throw UnknownArgError("Unknown argument: " + *it);
+		else throw Error("Unknown argument: " + *it);
 	}
 
 	
