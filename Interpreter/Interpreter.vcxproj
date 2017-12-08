@@ -116,12 +116,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Arguments.cpp" />
+    <ClCompile Include="BinaryFileReader.cpp" />
     <ClCompile Include="ExecutableFile.cpp" />
     <ClCompile Include="Interpreter.cpp" />
     <ClCompile Include="Machine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Arguments.hpp" />
+    <ClInclude Include="BinaryFileReader.hpp" />
     <ClInclude Include="Exceptions.hpp" />
     <ClInclude Include="ExecutableFile.hpp" />
     <ClInclude Include="Globals.hpp" />
