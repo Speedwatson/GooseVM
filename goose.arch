@@ -1,6 +1,22 @@
+/* 
+	GOOSE ARCHITECTURE v1.0
+			  __
+			>(' )
+			  )/   .`
+			 /(____/\
+			/        )
+			\ `  =~~/
+			 `-----|
+		  - - -  ~~^  - -
+
+	Word length: 		16 bits
+	Class:				Stack virtual machine
+	Memory regions: 	Code, constants, data, stack
+*/
+
 architecture Goose {
 	/* 
-		PREFIX SYSTEM EXPLANATION:
+		NAMING SYSTEM:
 
 		Private internal names:
 			__m_<name> 		- memory range
@@ -13,7 +29,7 @@ architecture Goose {
 	*/
 
 	registers:
-		storage A[32];												/* The only big-endian physical storage: [0 .. RSS .. 15 ][ 16 .. ERR .. 31] */
+		storage A[32];												/* The only little-endian physical storage: [0 .. RSS .. 15 ][ 16 .. ERR .. 31] */
 
 		view SSZ = A[0..15];										/* A view for the Stack Size storage */
 		view ERR = A[16..31];										/* A view for the current ERRor code storage */
@@ -27,19 +43,19 @@ architecture Goose {
 	memory:
 		range __m_code[0x0000..0xFFFF] {
 			cell = 8;
-			endianess = big-endian;
+			endianess = little-endian;
 			granularity = 0;
 		}
 
 		range __m_consts[0x0000..0xFFFF] {
 			cell = 8;
-			endianess = big-endian;
+			endianess = little-endian;
 			granularity = 0;
 		}
 
 		range __m_data[0x0000..0xFFFF] {
 			cell = 8;
-			endianess = big-endian;
+			endianess = little-endian;
 			granularity = 0;
 		}
 
@@ -50,7 +66,7 @@ architecture Goose {
 		*/
 		range __m_stack[0x0000..0xFFFF] {
 			cell = 16;
-			endianess = big-endian;
+			endianess = little-endian;
 			granularity = 16;
 		}
 
