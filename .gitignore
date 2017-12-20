@@ -4,3 +4,4 @@ tools/**/x64
 tools/**/Debug
 tools/**/Release
 tools/**/*.aps
+remote-tasks
