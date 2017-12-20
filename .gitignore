@@ -3,3 +3,4 @@ tools/**/*.user
 tools/**/x64
 tools/**/Debug
 tools/**/Release
+tools/**/*.aps
