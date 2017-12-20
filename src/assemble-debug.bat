@@ -1,0 +1,1 @@
+assemble.py %1 -d

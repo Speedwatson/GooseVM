@@ -20,7 +20,6 @@ int main(int argc, char* argv[]) {
 		
 		/*
 			TODO:
-				1) Assembly pipeline automation and directories cleanup
 				2) Experiment with .bin files, finding out details, affects and structure (+release/debug + source files integration to runtime exceptions)
 				3.1) Reviewing the structure (including call stack), reviewing fib, implementing fib.asm
 				3.2) Concurrently designing the ISA, adding intructions

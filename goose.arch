@@ -60,14 +60,12 @@ architecture Goose {
 		}
 
 		/* 
-			STACK MEMORY: stores data presented in stack. 
-
 			Each element has size of 2 bytes, so a pointer to the back element can be calculated like [__m_stack + (cell=16) * SSZ] 
 		*/
 		range __m_stack[0x0000..0xFFFF] {
-			cell = 16;
+			cell = 8;
 			endianess = little-endian;
-			granularity = 16;
+			granularity = 0;
 		}
 
 	instructions:
@@ -85,7 +83,7 @@ architecture Goose {
 			ERR = 10
 		};
 
-		encode __ef_insType	field = cases {
+		encode __ef_insType	field = cases { 								/* Instruction types */
 			basic = 00,
 			b = 01
 		};
