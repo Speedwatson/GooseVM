@@ -5,3 +5,4 @@ tools/**/Debug
 tools/**/Release
 tools/**/*.aps
 remote-tasks
+/jegor
