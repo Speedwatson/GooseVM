@@ -5,7 +5,7 @@
 BinaryFileReader::BinaryFileReader(std::string filename)
 	: fin(filename, std::ios::binary)
 {
-	if (!fin.is_open()) {
+	if (!fin.fail()) {
 		throw Error("File " + filename + " doesn't exist or you don't have permissions to read it.");
 	}
 }
