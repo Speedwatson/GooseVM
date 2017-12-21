@@ -53,15 +53,22 @@ void ExecutableFile::ModuleHeader::read(BinaryFileReader& bin){
 }
 
 void ExecutableFile::TablesHeader::read(BinaryFileReader & bin) {
-	bin >> sectionsCount \
-		>> symbolsCount				>> sourceFilesCount \
-		>> sourceTextRangesCount	>> sourceCodePointsCount	>> blobsCount \
+	bin >> sectionsCount
+		>> symbolsCount
+		>> sourceFilesCount
+		>> sourceTextRangesCount
+		>> sourceCodePointsCount
+		>> blobsCount
 		>> stringsCount;
 }
 
 void ExecutableFile::Section::read(BinaryFileReader & bin) {
-	bin >> blobIndex	>> bankNameIndex			>> startAddress \
-		>> kind_raw		>> customSectionNameIndex	>> accessMode;
+	bin >> blobIndex
+		>> bankNameIndex
+		>> startAddress
+		>> kind_raw	
+		>> customSectionNameIndex
+		>> accessMode;
 
 	switch (kind_raw)
 	{
@@ -73,19 +80,27 @@ void ExecutableFile::Section::read(BinaryFileReader & bin) {
 }
 
 void ExecutableFile::Symbol::read(BinaryFileReader & bin) {
-	bin >> sectionIndex >> blobEntryIndex >> nameIndex;
+	bin >> sectionIndex 
+		>> blobEntryIndex 
+		>> nameIndex;
 }
 
 void ExecutableFile::SourceFile::read(BinaryFileReader & bin) {
-	bin >> fileNameIndex >> sha256hashBytesIndex;
+	bin >> fileNameIndex 
+		>> sha256hashBytesIndex;
 }
 
 void ExecutableFile::SourceTextRange::read(BinaryFileReader & bin) {
-	bin >> sourceFileIndex >> position >> length >> line >> column;
+	bin >> sourceFileIndex 
+		>> position 
+		>> length
+		>> line 
+		>> column;
 }
 
 void ExecutableFile::SourceCodePoint::read(BinaryFileReader & bin) {
-	bin >> address >> sourceOperationRangeIndex;
+	bin >> address 
+		>> sourceOperationRangeIndex;
 }
 
 void ExecutableFile::Blob::read_length(BinaryFileReader & bin) {
