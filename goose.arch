@@ -19,9 +19,9 @@ architecture Goose {
 		NAMING SYSTEM:
 
 		Private internal names:
-			__m_<name> 		- memory range
-			__ef_<name> 	- encoded field
-			__es_<name>		- encoded sequence
+			mName 		- memory range
+			efName	 	- encoded field
+			esName		- encoded sequence
 
 		Public names:
 			Registsers should be written in CAPS.
@@ -29,10 +29,19 @@ architecture Goose {
 	*/
 
 	registers:
-		storage A[32];												/* The only little-endian physical storage: [0 .. RSS .. 15 ][ 16 .. ERR .. 31] */
+		storage STACK_STORAGE[32];									/* A little-endian physical storage to serve for stack maintaining purposes: */
+																	/* [0 .. SSZ .. 15 ][ 16 .. CSZ .. 31] */
 
-		view SSZ = A[0..15];										/* A view for the Stack Size storage */
-		view ERR = A[16..31];										/* A view for the current ERRor code storage */
+		storage SYSTEM_STORAGE[16];									/* A little-endian physical storage for system essential data: */
+																	/* [0 .. ERR .. 15] */
+
+
+		view SSZ = STACK_STORAGE[0..15];							/* A view for the current Stack Size storage */
+
+		view CSZ = STACK_STORAGE[16..31];							/* A view for the subroutine Caller's stack Size storage at the entry point */
+																	/* For "main" or "root" subroutine it's -1 */
+
+		view ERR = A[16..31];										/* A view for the current error code storage */
 
 		/*
 			ERROR CODES:
@@ -41,19 +50,19 @@ architecture Goose {
 		*/
 		
 	memory:
-		range __m_code[0x0000..0xFFFF] {
+		range mCode[0x0000..0xFFFF] {
 			cell = 8;
 			endianess = little-endian;
 			granularity = 0;
 		}
 
-		range __m_consts[0x0000..0xFFFF] {
+		range mConsts[0x0000..0xFFFF] {
 			cell = 8;
 			endianess = little-endian;
 			granularity = 0;
 		}
 
-		range __m_data[0x0000..0xFFFF] {
+		range mData[0x0000..0xFFFF] {
 			cell = 8;
 			endianess = little-endian;
 			granularity = 0;
@@ -62,7 +71,7 @@ architecture Goose {
 		/* 
 			Each element has size of 2 bytes, so a pointer to the back element can be calculated like [__m_stack + (cell=16) * SSZ] 
 		*/
-		range __m_stack[0x0000..0xFFFF] {
+		range mStack[0x0000..0xFFFF] {
 			cell = 8;
 			endianess = little-endian;
 			granularity = 0;
@@ -71,28 +80,118 @@ architecture Goose {
 	instructions:
 		/* ---------------- TYPE ENCODINGS ---------------- */
 
-		encode __ef_imm8	field = immediate[8] data;						/* generic data stored in 1 byte */
-		encode __ef_imm16	field = immediate[16] data;						/* generic data stored in 2 bytes */
-		encode __ef_imm32	field = immediate[32] data;						/* generic data stored in 4 bytes */
-		encode __ef_imm64	field = immediate[64] data;						/* generic data stored in 8 bytes */
+		encode efImm8	field = immediate[8] data;						/* generic data stored in 1 byte */
+		encode efImm16	field = immediate[16] data;						/* generic data stored in 2 bytes */
+		encode efImm32	field = immediate[32] data;						/* generic data stored in 4 bytes */
+		encode efImm64	field = immediate[64] data;						/* generic data stored in 8 bytes */
 
-		encode __ef_off 	field = immediate[16] offset;					/* memory offset (maximum is 0xFFFF, what is the size of any memory range) */
+		encode efOff 	field = immediate[16] offset;					/* memory offset (maximum is 0xFFFF, what is the size of any memory range) */
 
-		encode __ef__reg	field = register {								/* REGISTERS BYTECODE DEFINITIONS */
-			SSZ = 00,														/* We'll leave some space for possible regiesters introduced in future */
+		encode efReg	field = register {								/* BITS OF REGISERS DEFINITION */
+			SSZ = 00,													/* We'll leave some space for possible regiesters introduced in future */
 			ERR = 10
 		};
 
-		encode __ef_insType	field = cases { 								/* Instruction types */
-			basic = 00,
-			b = 01
+		encode efInstrType	field = cases { 							/* BITS OF INSTRUCTION TYPES DEFINITION */
+			stack 		= 000,											/* 000x xxxx are stack instructions except nop{ 0000 0000 } */
+			flowctrl 	= 001,
+			arithmetic	= 010,
+			bitwise		= 011,
+			io 			= 100,
+			other 		= 101
 		};
 
-		/* -------------- BASIC INSTRUCTIONS -------------- */
 
-		instruction nop = { 1001 1000 };
+		/* -------------- STACK INSTRUCTIONS -------------- */
 
+		
+		/* ----------- FLOW CONTROL INSTRUCTIONS ---------- */
+
+		
+		/* ------------ ARITHMETIC INSTRUCTIONS ----------- */
+
+		instruction add = {};
+
+
+		/* ------------- BITWISE INSTRUCTIONS ------------- */
+
+
+		/* ----------- INPUT/OUTPUT INSTRUCTIONS ---------- */
+		
+
+		/* -------------- OTHER INSTRUCTIONS -------------- */
+
+		instruction nop = { 0000 0000 };
+
+	
 	mnemonics:
 
+		/* ------------ FOR STACK INSTRUCTIONS ------------- */
+
+		// pop dest
+		// push imm/dest
+		// swp
+		// sav
+		
+		/* --------- FOR FLOW CONTROL INSTRUCTIONS --------- */
+
+		// jmp
+		// jump by offset?
+		
+		// je
+		// jl
+		// jg
+		// jle
+		// jge
+
+		// jez
+		// jgz
+		// jlz
+		// jgez
+		// jlez
+
+		// call symb
+		// ret
+		// calln symb // call with n args put onto subroutine's stack
+		// retn		  // return with n top vals put onto caller's stack
+		
+		/* ---------- FOR ARITHMETIC INSTRUCTIONS ---------- */
+
+		mnemonic add() for add_0;
+		
+		// sub
+		// inc
+		// dec
+		// mlt
+		// neg
+		// div
+		// mod
+		
+		/* ----------- FOR BITWISE INSTRUCTIONS ----------- */
+		// not
+		// and
+		// or
+		// xor
+
+
+		/* --------- FOR INPUT/OUTPUT INSTRUCTIONS -------- */
+		
+		// nbinp 		// number of byte input
+		// nwinp		// number of word input
+		// ndinp		// number of double word input
+		// nqinp		// number of quadword input
+		// cbinp		// input character as a byte
+
+		//out
+
+
+
+		/* ----------- FOR OTHER INSTRUCTIONS ------------- */
+
 		mnemonic nop();
+
+		// cmp -> -1 0 1
+		// stop
+
+
 }
