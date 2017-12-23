@@ -112,12 +112,6 @@ architecture Goose {
 			default = { 0000 0000 }
 		};
 
-		encode numOr1 sequence = alternatives {
-			defined = { imm8 as num },
-			default = { 0000 0001 }
-		};
-
-
 		/* -------------- STACK INSTRUCTIONS -------------- */
 
 		// instruction nop 			= { 0000 0000 }; - declared in OTHER INSTRUCTIONS
@@ -188,26 +182,23 @@ architecture Goose {
 
 		/* ----------- INPUT/OUTPUT INSTRUCTIONS ---------- */
 		
-		instruction inp_b			= { instrType.io, 0 0000, sequence numOr1AndOfs };
-		instruction inp_b_stack		= { instrType.io, 0 0001, sequence numOr1 };
-		instruction inp_w			= { instrType.io, 0 0010, sequence numOr1AndOfs };
-		instruction inp_w_stack		= { instrType.io, 0 0011, sequence numOr1 };
-		instruction inp_d			= { instrType.io, 0 0100, sequence numOr1AndOfs };
-		instruction inp_d_stack		= { instrType.io, 0 0101, sequence numOr1 };
-		instruction inp_q			= { instrType.io, 0 0110, sequence numOr1AndOfs };
-		instruction inp_q_stack		= { instrType.io, 0 0111, sequence numOr1 };
-		instruction inp_char		= { instrType.io, 0 1000, sequence numOr1AndOfs };
-		instruction inp_char_stack	= { instrType.io, 0 1001, sequence numOr1 };
-		instruction out_b			= { instrType.io, 0 1010, sequence numOr1AndOfs };
-		instruction out_b_stack		= { instrType.io, 0 1011, sequence numOr1 };
-		instruction out_w			= { instrType.io, 0 1100, sequence numOr1AndOfs };
-		instruction out_w_stack		= { instrType.io, 0 1101, sequence numOr1 };
-		instruction out_d			= { instrType.io, 0 1110, sequence numOr1AndOfs };
-		instruction out_d_stack		= { instrType.io, 0 1111, sequence numOr1 };
-		instruction out_q			= { instrType.io, 1 0000, sequence numOr1AndOfs };
-		instruction out_q_stack		= { instrType.io, 1 0001, sequence numOr1 };
-		instruction out_char		= { instrType.io, 1 0010, sequence numOr1AndOfs };
-		instruction out_char_stack	= { instrType.io, 1 0011, sequence numOr1 };
+		instruction inp_b			= { instrType.io, 0 0000, ofs16 as dest };
+		instruction inp_b_stack		= { instrType.io, 0 0001 };
+		instruction inp_w			= { instrType.io, 0 0010, ofs16 as dest };
+		instruction inp_w_stack		= { instrType.io, 0 0011 };
+		instruction inp_d			= { instrType.io, 0 0100, ofs16 as dest };
+		instruction inp_d_stack		= { instrType.io, 0 0101 };
+		instruction inp_q			= { instrType.io, 0 0110, ofs16 as dest };
+		instruction inp_q_stack		= { instrType.io, 0 0111 };
+		instruction inp_char		= { instrType.io, 0 1000, ofs16 as dest };
+		instruction inp_char_stack	= { instrType.io, 0 1001 };
+
+		instruction out_b			= { instrType.io, 0 1010, ofs16 as src };
+		instruction out_w			= { instrType.io, 0 1011, ofs16 as src };
+		instruction out_d			= { instrType.io, 0 1100, ofs16 as src };
+		instruction out_q			= { instrType.io, 0 1101, ofs16 as src };
+		instruction out_char		= { instrType.io, 0 1110, ofs16 as src };
+		instruction out_stack		= { instrType.io, 0 1111 };
 
 
 		/* -------------- OTHER INSTRUCTIONS -------------- */
@@ -299,39 +290,25 @@ architecture Goose {
 
 		/* --------- FOR INPUT/OUTPUT INSTRUCTIONS -------- */
 
-		mnemonic inp 	for inp_b (num, ofs) "{1}b {2}" when defined,
-					 	for inp_b (ofs) "b {1}" when num_not_defined,
-					 	for inp_b_stack () "b" when default,
-					 	for inp_b_stack (num) "{1}b" when defined,
-					 	for inp_w (num, ofs) "{1}w {2}" when defined,
-					 	for inp_w (ofs) "w {1}" when num_not_defined,
-					 	for inp_w_stack () "w" when default,
-					 	for inp_w_stack (num) "{1}w" when defined,
-					 	for inp_d (num, ofs) "{1}d {2}" when defined,
-					 	for inp_d (ofs) "d {1}" when num_not_defined,
-					 	for inp_d_stack () "d" when default,
-					 	for inp_d_stack (num) "{1}d" when defined,
-					 	for inp_q (num, ofs) "{1}q {2}" when defined,
-					 	for inp_q (ofs) "q {1}" when num_not_defined,
-					 	for inp_q_stack () "q" when default,
-					 	for inp_q_stack (num) "{1}q" when defined;
+		mnemonic inp 	for inp_b (dest) "b {1}" when ofs16,
+					 	for inp_b_stack () "b",
+					 	for inp_w (dest) "w {1}" when ofs16,
+					 	for inp_w_stack () "w",
+					 	for inp_d (dest) "d {1}" when ofs16,
+					 	for inp_d_stack () "d",
+					 	for inp_q (dest) "q {1}" when ofs16,
+					 	for inp_q_stack () "q",
+					 	for inp_char (dest) "c {1}" when ofs16,
+					 	for inp_char_stack () "c";
 	
-		mnemonic out 	for out_b (num, ofs) "{1}b {2}" when defined,
-					 	for out_b (ofs) "b {1}" when num_not_defined,
-					 	for out_b_stack () "b" when default,
-					 	for out_b_stack (num) "{1}b" when defined,
-					 	for out_w (num, ofs) "{1}w {2}" when defined,
-					 	for out_w (ofs) "w {1}" when num_not_defined,
-					 	for out_w_stack () "w" when default,
-					 	for out_w_stack (num) "{1}w" when defined,
-					 	for out_d (num, ofs) "{1}d {2}" when defined,
-					 	for out_d (ofs) "d {1}" when num_not_defined,
-					 	for out_d_stack () "d" when default,
-					 	for out_d_stack (num) "{1}d" when defined,
-					 	for out_q (num, ofs) "{1}q {2}" when defined,
-					 	for out_q (ofs) "q {1}" when num_not_defined,
-					 	for out_q_stack () "q" when default,
-					 	for out_q_stack (num) "{1}q" when defined;
+		mnemonic out 	for out_b (src) "b {1}" when ofs16,
+						for out_w (src) "w {1}" when ofs16,
+						for out_d (src) "d {1}" when ofs16,
+						for out_q (src) "q {1}" when ofs16,
+						for out_char (src) "c {1}" when ofs16,
+						for out_stack ();
+					 	
+
 
 		/* ----------- FOR OTHER INSTRUCTIONS ------------- */
 
@@ -342,5 +319,9 @@ architecture Goose {
 
 		// cmp -> -1 0 1
 
+
+
+//push 1 is push_b, not push_by_ofs? push_by_ofs is push *n? YEAH!
+//push 
 
 }

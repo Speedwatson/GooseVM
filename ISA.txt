@@ -145,26 +145,26 @@
  
 /* ----------- INPUT/OUTPUT INSTRUCTIONS ---------- */
 
-100 00000	inp_b				[imm8 number = 1]b <ofs16 dest>
-100 00001	inp_b_stack			[imm8 number = 1]b
-100 00010	inp_w				[imm8 number = 1]w <ofs16 dest>
-100 00011	inp_w_stack			[imm8 number = 1]w
-100 00100	inp_d				[imm8 number = 1]d <ofs16 dest>
-100 00101	inp_d_stack			[imm8 number = 1]d
-100 00110	inp_q				[imm8 number = 1]q <ofs16 dest>
-100 00111	inp_q_stack			[imm8 number = 1]q
-100 01000	inp_char			[imm8 number = 1]c <ofs16 dest>
-100 01001	inp_char_stack		[imm8 number = 1]c
-100 01010	out_b 				[imm8 number = 1]b <ofs16 dest>
-100 01011	out_b_stack 		[imm8 number = 1]b
-100 01100	out_w				[imm8 number = 1]w <ofs16 dest>
-100 01101	out_w_stack			[imm8 number = 1]w
-100 01110	out_d				[imm8 number = 1]d <ofs16 dest>
-100 01111	out_d_stack			[imm8 number = 1]d
-100 10000	out_q				[imm8 number = 1]q <ofs16 dest>
-100 10001	out_q_stack			[imm8 number = 1]q
-100 10010	out_char			[imm8 number = 1]c <ofs16 dest>
-100 10011	out_char_stack		[imm8 number = 1]c
+100 00000	inp_b				b <ofs16 dest>
+100 00001	inp_b_stack			b
+100 00010	inp_w				w <ofs16 dest>
+100 00011	inp_w_stack			w
+100 00100	inp_d				d <ofs16 dest>
+100 00101	inp_d_stack			d
+100 00110	inp_q				q <ofs16 dest>
+100 00111	inp_q_stack			q
+100 01000	inp_char			c <ofs16 dest>
+100 01001	inp_char_stack		c
+100 01010	out_b 				b <ofs16 src>
+100 01011	out_w				w <ofs16 src>
+100 01100	out_d				d <ofs16 src>
+100 01101	out_q				q <ofs16 src>
+100 01110	out_char			c <ofs16 src>
+100 01111	out_stack				
+100 10000	
+100 10001	
+100 10010	
+100 10011
 100 10100	
 100 10101
 100 10110
