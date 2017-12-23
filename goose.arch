@@ -118,13 +118,16 @@ architecture Goose {
 
 		instruction pop 			= { instrType.stack, 0 0001, ofs16 as destofs };
 		instruction push_ofs 		= { instrType.stack, 0 0010, ofs16 as ofs };
-		instruction push_by_ofs	 	= { instrType.stack, 0 0011, ofs16 as srcofs };
-		instruction push_b		 	= { instrType.stack, 0 0100, imm8 as imm };
-		instruction push_w		 	= { instrType.stack, 0 0101, imm16 as imm };
-		instruction push_d	 		= { instrType.stack, 0 0110, imm32 as imm };
-		instruction push_q	 		= { instrType.stack, 0 0111, imm64 as imm };
-		instruction swp			 	= { instrType.stack, 0 1000 };
-		instruction sav			 	= { instrType.stack, 0 1001, ofs16 as destofs };
+		instruction push_b 		 	= { instrType.stack, 0 0011, imm8 as number };
+		instruction push_w 		 	= { instrType.stack, 0 0100, imm16 as number };
+		instruction push_d 		 	= { instrType.stack, 0 0101, imm32 as number };
+		instruction push_q 		 	= { instrType.stack, 0 0110, imm64 as number };
+		instruction push_by_ofs_b	= { instrType.stack, 0 0111, ofs16 as srcofs };
+		instruction push_by_ofs_w	= { instrType.stack, 0 1000, ofs16 as srcofs };
+		instruction push_by_ofs_d	= { instrType.stack, 0 1001, ofs16 as srcofs };
+		instruction push_by_ofs_q	= { instrType.stack, 0 1010, ofs16 as srcofs };
+		instruction swp			 	= { instrType.stack, 0 1011 };
+		instruction sav			 	= { instrType.stack, 0 1100, ofs16 as destofs };
 
 		
 		/* ----------- FLOW CONTROL INSTRUCTIONS ---------- */
@@ -213,12 +216,7 @@ architecture Goose {
 		/* --------- ARGUMENT FORMAT DEFINITIONS ---------- */
 
 		format arg_plain 		is "{1}";
-		format arg_offset 		is "&{1}";
 		format arg_dereference	is "*{1}";
-		format arg_imm_byte 	is "b {1}";
-		format arg_imm_word 	is "w {1}";
-		format arg_imm_double 	is "d {1}";
-		format arg_imm_quad 	is "q {1}";
 
 		format arg_plain_plain  is "{1} {2}";
 
@@ -226,14 +224,20 @@ architecture Goose {
 		/* ------------ FOR STACK INSTRUCTIONS ------------- */
 
 		mnemonic pop 	(destofs) arg_plain when ofs16;
-		mnemonic push 	for push_ofs (ofs) arg_offset,
-						for push_by_ofs (srcofs) arg_plain when ofs16,
-						for push_b (imm) arg_imm_byte when imm8,
-						for push_w (imm) arg_imm_word when imm16,
-						for push_d (imm) arg_imm_double when imm32,
-						for push_q (imm) arg_imm_quad when imm64;
+
+		mnemonic push 	for push_ofs (ofs) arg_plain when ofs16,
+						for push_b (number) "{1}" when imm8,
+						for push_w (number) "w {1}" when imm16,
+						for push_d (number) "d {1}" when imm32,
+						for push_q (number) "q {1}" when imm64,
+						for push_by_ofs_b (srcofs) "*{1}" when ofs16,
+						for push_by_ofs_w (srcofs) "w *{1}" when ofs16,
+						for push_by_ofs_d (srcofs) "d *{1}" when ofs16,
+						for push_by_ofs_q (srcofs) "q *{1}" when ofs16;
+						
 		mnemonic swp();
 		mnemonic sav	(destofs) arg_plain when ofs16;
+
 
 		/* --------- FOR FLOW CONTROL INSTRUCTIONS --------- */
 
