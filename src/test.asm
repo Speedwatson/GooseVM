@@ -1,6 +1,5 @@
 [section __code]
-	push b 1
-	pop n
+	ret 2
 
 
 [section __data]

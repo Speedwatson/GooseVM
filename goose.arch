@@ -107,24 +107,53 @@ architecture Goose {
 
 		// instruction nop 			= { 0000 0000 }; - declared in OTHER INSTRUCTIONS
 
-		instruction pop 			= { instrType.stack, 00001, ofs16 as destofs };
-		instruction push_ofs 		= { instrType.stack, 00010, ofs16 as ofs };
-		instruction push_by_ofs	 	= { instrType.stack, 00011, ofs16 as srcofs };
-		instruction push_b		 	= { instrType.stack, 00100, imm8 as imm };
-		instruction push_w		 	= { instrType.stack, 00101, imm16 as imm };
-		instruction push_d	 		= { instrType.stack, 00110, imm32 as imm };
-		instruction push_q	 		= { instrType.stack, 00111, imm64 as imm };
-		instruction swp			 	= { instrType.stack, 01000 };
-		instruction sav			 	= { instrType.stack, 01001, ofs16 as destofs };
+		instruction pop 			= { instrType.stack, 0 0001, ofs16 as destofs };
+		instruction push_ofs 		= { instrType.stack, 0 0010, ofs16 as ofs };
+		instruction push_by_ofs	 	= { instrType.stack, 0 0011, ofs16 as srcofs };
+		instruction push_b		 	= { instrType.stack, 0 0100, imm8 as imm };
+		instruction push_w		 	= { instrType.stack, 0 0101, imm16 as imm };
+		instruction push_d	 		= { instrType.stack, 0 0110, imm32 as imm };
+		instruction push_q	 		= { instrType.stack, 0 0111, imm64 as imm };
+		instruction swp			 	= { instrType.stack, 0 1000 };
+		instruction sav			 	= { instrType.stack, 0 1001, ofs16 as destofs };
 
 		
 		/* ----------- FLOW CONTROL INSTRUCTIONS ---------- */
 
-		instruction jmp 			= { instrType.flowctrl, 00000, ofs16 as label };
+		instruction jmp 			= { instrType.flowctrl, 0 0000, ofs16 as targetLabel };
+		instruction jmp_by_offset	= { instrType.flowctrl, 0 0001, ofs16 as targetOfsVarPtr };
+ 
+		instruction je 				= { instrType.flowctrl, 0 0010, ofs16 as targetLabel };
+		instruction je_by_offset	= { instrType.flowctrl, 0 0011, ofs16 as targetOfsVarPtr };
+		instruction jl 				= { instrType.flowctrl, 0 0100, ofs16 as targetLabel };
+		instruction jl_by_offset	= { instrType.flowctrl, 0 0101, ofs16 as targetOfsVarPtr };
+		instruction jg 				= { instrType.flowctrl, 0 0110, ofs16 as targetLabel };
+		instruction jg_by_offset	= { instrType.flowctrl, 0 0111, ofs16 as targetOfsVarPtr };
+		instruction jle 			= { instrType.flowctrl, 0 1000, ofs16 as targetLabel };
+		instruction jle_by_offset	= { instrType.flowctrl, 0 1001, ofs16 as targetOfsVarPtr };
+		instruction jge 			= { instrType.flowctrl, 0 1010, ofs16 as targetLabel };
+		instruction jge_by_offset	= { instrType.flowctrl, 0 1011, ofs16 as targetOfsVarPtr };
+ 
+		instruction jez 			= { instrType.flowctrl, 0 1100, ofs16 as targetLabel };
+		instruction jez_by_offset	= { instrType.flowctrl, 0 1101, ofs16 as targetOfsVarPtr };
+		instruction jgz 			= { instrType.flowctrl, 0 1110, ofs16 as targetLabel };
+		instruction jgz_by_offset	= { instrType.flowctrl, 0 1111, ofs16 as targetOfsVarPtr };
+		instruction jlz 			= { instrType.flowctrl, 1 0000, ofs16 as targetLabel };
+		instruction jlz_by_offset	= { instrType.flowctrl, 1 0001, ofs16 as targetOfsVarPtr };
+		instruction jgez 			= { instrType.flowctrl, 1 0010, ofs16 as targetLabel };
+		instruction jgez_by_offset	= { instrType.flowctrl, 1 0011, ofs16 as targetOfsVarPtr };
+		instruction jlez 			= { instrType.flowctrl, 1 0100, ofs16 as targetLabel };
+		instruction jlez_by_offset	= { instrType.flowctrl, 1 0101, ofs16 as targetOfsVarPtr };
+
+		instruction call 			= { instrType.flowctrl, 1 0110, ofs16 as subroutineLabel };
+		instruction call_nargs		= { instrType.flowctrl, 1 0111, ofs16 as subroutineLabel, imm8 as argsNumber };
 		
+		instruction ret 			= { instrType.flowctrl, 1 1000 };
+		instruction ret_nvalues		= { instrType.flowctrl, 1 1001, imm8 as valuesNumber };
+
 		/* ------------ ARITHMETIC INSTRUCTIONS ----------- */
 
-		// instruction add = {};
+		//instruction add0 = {};
 
 
 		/* ------------- BITWISE INSTRUCTIONS ------------- */
@@ -144,10 +173,13 @@ architecture Goose {
 
 		format arg_plain 		is "{1}";
 		format arg_offset 		is "&{1}";
+		format arg_dereference	is "*{1}";
 		format arg_imm_byte 	is "b {1}";
 		format arg_imm_word 	is "w {1}";
 		format arg_imm_double 	is "d {1}";
 		format arg_imm_quad 	is "q {1}";
+
+		format arg_plain_plain  is "{1} {2}";
 
 
 		/* ------------ FOR STACK INSTRUCTIONS ------------- */
@@ -164,26 +196,38 @@ architecture Goose {
 
 		/* --------- FOR FLOW CONTROL INSTRUCTIONS --------- */
 
-		// jmp
-		// jump by offset?
-		
-		// je
-		// jl
-		// jg
-		// jle
-		// jge
+		mnemonic jmp 	(targetLabel) arg_plain when ofs16,
+						for jmp_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
 
-		// jez
-		// jgz
-		// jlz
-		// jgez
-		// jlez
+		mnemonic je 	(targetLabel) arg_plain when ofs16,
+						for je_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
+		mnemonic jl 	(targetLabel) arg_plain when ofs16,
+						for jl_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
+		mnemonic jg 	(targetLabel) arg_plain when ofs16,
+						for jg_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
+		mnemonic jle 	(targetLabel) arg_plain when ofs16,
+						for jle_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
+		mnemonic jge 	(targetLabel) arg_plain when ofs16,
+						for jge_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
 
-		// call symb
-		// ret
-		// calln symb // call with n args put onto subroutine's stack
-		// retn		  // return with n top vals put onto caller's stack
-		
+		mnemonic jez 	(targetLabel) arg_plain when ofs16,
+						for jez_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
+		mnemonic jgz 	(targetLabel) arg_plain when ofs16,
+						for jgz_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
+		mnemonic jlz 	(targetLabel) arg_plain when ofs16,
+						for jlz_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
+		mnemonic jgez 	(targetLabel) arg_plain when ofs16,
+						for jgez_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
+		mnemonic jlez 	(targetLabel) arg_plain when ofs16,
+						for jlez_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
+
+		mnemonic call 	(subroutineLabel) arg_plain,
+						for call_nargs (subroutineLabel, argsNumber) arg_plain_plain; // call with n args put onto subroutine's stack
+
+		mnemonic ret 	(),
+						for ret_nvalues (valuesNumber) arg_plain; // return with n top vals put onto caller's stack ("returned")
+
+
 		/* ---------- FOR ARITHMETIC INSTRUCTIONS ---------- */
 
 		//mnemonic add() for add_0;

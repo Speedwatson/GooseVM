@@ -3,15 +3,15 @@
 
 /* -------------- STACK INSTRUCTIONS -------------- */
 
-000 0 0001	pop <ofs16 as destofs>
-000 0 0010	push_ofs <ofs16 as ofs>
-000 0 0011	push_by_ofs <ofs16 as srcofs>
-000 0 0100	push_b <imm8 as imm>
-000 0 0101	push_w <imm16 as imm>
-000 0 0110	push_d <imm32 as imm>
-000 0 0111	push_q <imm64 as imm>
+000 0 0001	pop 			<ofs16>
+000 0 0010	push_ofs 		&<ofs16>
+000 0 0011	push_by_ofs 	<ofs16>
+000 0 0100	push_b 			b <imm8>
+000 0 0101	push_w 			w <imm16>
+000 0 0110	push_d 			d <imm32>
+000 0 0111	push_q 			q <imm64>
 000 0 1000	swp
-000 0 1001	sav <ofs16 as destofs>
+000 0 1001	sav 			<ofs16>
 000 0 1010
 000 0 1011
 000 0 1100
@@ -38,32 +38,32 @@
 
 /* ----------- FLOW CONTROL INSTRUCTIONS ---------- */
 
-001 00000
-001 00001
-001 00010
-001 00011
-001 00100
-001 00101
-001 00110
-001 00111
-001 01000
-001 01001
-001 01010
-001 01011
-001 01100
-001 01101
-001 01110
-001 01111
-001 10000
-001 10001
-001 10010
-001 10011
-001 10100
-001 10101
-001 10110
-001 10111
-001 11000
-001 11001
+001 00000	jmp 			<ofs16>
+001 00001	jmp_by_offset	*<ofs16>
+001 00010	je 				<ofs16>
+001 00011	je_by_offset	*<ofs16>
+001 00100	jl 				<ofs16>
+001 00101	jl_by_offset	*<ofs16>
+001 00110	jg 				<ofs16>
+001 00111	jg_by_offset	*<ofs16>
+001 01000	jle 			<ofs16>
+001 01001	jle_by_offset	*<ofs16>
+001 01010	jge 			<ofs16>
+001 01011	jge_by_offset	*<ofs16>
+001 01100	jez 			<ofs16>
+001 01101	jez_by_offset	*<ofs16>
+001 01110	jgz 			<ofs16>
+001 01111	jgz_by_offset	*<ofs16>
+001 10000	jlz 			<ofs16>
+001 10001	jlz_by_offset	*<ofs16>
+001 10010	jgez 			<ofs16>
+001 10011	jgez_by_offset	*<ofs16>
+001 10100	jlez 			<ofs16>
+001 10101	jlez_by_offset	*<ofs16>
+001 10110	call 			<ofs16>
+001 10111	call_nargs		<ofs16> <imm8> 
+001 11000	ret 			
+001 11001	ret_nvalues		<imm8>
 001 11010
 001 11011
 001 11100
