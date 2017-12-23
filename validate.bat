@@ -1,0 +1,1 @@
+remote-tasks\rt -w -v -s ValidateArchDefSyntax definitionFile goose.arch archName Goose
