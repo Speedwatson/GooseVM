@@ -32,19 +32,25 @@ if len(sys.argv) != 1:
                 sources,
             )
     else:
-        request = '"{}" -id -w -s Assemble definitionFile ..\\goose.arch archName Goose asmListing "{}"'.format(
+        request = '"{}" -id -v -w -s Assemble definitionFile ..\\goose.arch archName Goose asmListing "{}"'.format(
                 remote_tasks_path,
                 asm_file,
             )
 
     print("Executing", request)
     answer = run_shell(request)
-    guid = answer.split('\n')[0][:-1]
 
+    guid = answer.split('\n')[0][:-1]
 
     if len(guid) == 36 and guid.count('-') == 4:
         print("Got task guid:", guid, '\n')
-        print(run_shell('"{}" -g {}'.format(remote_tasks_path, guid)))
+
+        answer = run_shell('"{}" -g {}'.format(remote_tasks_path, guid))
+        print(answer)
+
+        if 'failed' in answer:
+            print("Failed to assemble {}!".format(asm_file))
+            exit()
 
         print('Downloading files...')
         run_shell('"{}" -g {} -r out.ptptb -o "{}"'.format(remote_tasks_path, guid, local_bin_path))
