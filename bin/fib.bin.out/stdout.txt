@@ -1,3 +1,21 @@
 Architecture 'Goose' seems to be valid for now.
-Assembling accomplished.
-Binary module written.
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(4,1): Invalid mnemonic string: push 1
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(5,1): Invalid mnemonic string: push 1
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(6,1): Invalid mnemonic string: nbinp
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(7,1): Invalid mnemonic string: pop &n
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(9,1): Invalid mnemonic string: jmp cycle
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(13,1): Invalid mnemonic string: push 2
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(14,1): Invalid mnemonic string: push n
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(15,1): Invalid mnemonic string: jle answer
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(18,1): Invalid mnemonic string: push n
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(19,1): Invalid mnemonic string: dec
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(20,1): Invalid mnemonic string: pop n
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(23,1): Invalid mnemonic string: sav t
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(24,1): Invalid mnemonic string: add
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(25,1): Invalid mnemonic string: push t
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(26,1): Invalid mnemonic string: swp
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(28,1): Invalid mnemonic string: jmp cycle
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(31,1): Invalid mnemonic string: out
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(32,1): Invalid mnemonic string: push 0
+C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(33,1): Invalid mnemonic string: stop
+Assembling failed.

@@ -41,7 +41,7 @@ architecture Goose {
 		view CSZ = STACK_STORAGE[16..31];							/* A view for the subroutine Caller's stack Size storage at the entry point */
 																	/* For "main" or "root" subroutine it's -1 */
 
-		view ERR = A[16..31];										/* A view for the current error code storage */
+		view ERR = SYSTEM_STORAGE[0..15];							/* A view for the current error code storage */
 
 		/*
 			ERROR CODES:
@@ -80,21 +80,22 @@ architecture Goose {
 	instructions:
 		/* ---------------- TYPE ENCODINGS ---------------- */
 
-		encode efImm8	field = immediate[8] data;						/* generic data stored in 1 byte */
-		encode efImm16	field = immediate[16] data;						/* generic data stored in 2 bytes */
-		encode efImm32	field = immediate[32] data;						/* generic data stored in 4 bytes */
-		encode efImm64	field = immediate[64] data;						/* generic data stored in 8 bytes */
+		encode imm8		field = immediate[8] data;						/* generic data stored in 1 byte */
+		encode imm16	field = immediate[16] data;						/* generic data stored in 2 bytes */
+		encode imm32	field = immediate[32] data;						/* generic data stored in 4 bytes */
+		encode imm64	field = immediate[64] data;						/* generic data stored in 8 bytes */
 
-		encode efOff 	field = immediate[16] offset;					/* memory offset (maximum is 0xFFFF, what is the size of any memory range) */
+		encode ofs16  	field = immediate[16] offset;					/* memory offset (maximum is 0xFFFF, what is the size of any memory range) */
 
-		encode efReg	field = register {								/* BITS OF REGISERS DEFINITION */
-			SSZ = 00,													/* We'll leave some space for possible regiesters introduced in future */
+		encode reg 		field = register {								/* BITS OF REGISERS DEFINITION */
+			SSZ = 00,
+			CSZ = 01,
 			ERR = 10
 		};
 
-		encode efInstrType	field = cases { 							/* BITS OF INSTRUCTION TYPES DEFINITION */
-			stack 		= 000,											/* 000x xxxx are stack instructions except nop{ 0000 0000 } */
-			flowctrl 	= 001,
+		encode instrType field = cases { 								/* BITS OF INSTRUCTION TYPES DEFINITION */
+			stack 		= 000,											/* 000x xxxx are stack instructions except nop = { 0000 0000 } */
+			flowctrl 	= 001,										
 			arithmetic	= 010,
 			bitwise		= 011,
 			io 			= 100,
@@ -104,13 +105,26 @@ architecture Goose {
 
 		/* -------------- STACK INSTRUCTIONS -------------- */
 
+		// instruction nop 			= { 0000 0000 }; - declared in OTHER INSTRUCTIONS
+
+		instruction pop 			= { instrType.stack, 00001, ofs16 as destofs };
+		instruction push_ofs 		= { instrType.stack, 00010, ofs16 as ofs };
+		instruction push_by_ofs	 	= { instrType.stack, 00011, ofs16 as srcofs };
+		instruction push_b		 	= { instrType.stack, 00100, imm8 as imm };
+		instruction push_w		 	= { instrType.stack, 00101, imm16 as imm };
+		instruction push_d	 		= { instrType.stack, 00110, imm32 as imm };
+		instruction push_q	 		= { instrType.stack, 00111, imm64 as imm };
+		instruction swp			 	= { instrType.stack, 01000 };
+		instruction sav			 	= { instrType.stack, 01001, ofs16 as destofs };
+
 		
 		/* ----------- FLOW CONTROL INSTRUCTIONS ---------- */
 
+		instruction jmp 			= { instrType.flowctrl, 00000, ofs16 as label };
 		
 		/* ------------ ARITHMETIC INSTRUCTIONS ----------- */
 
-		instruction add = {};
+		// instruction add = {};
 
 
 		/* ------------- BITWISE INSTRUCTIONS ------------- */
@@ -126,13 +140,28 @@ architecture Goose {
 	
 	mnemonics:
 
+		/* --------- ARGUMENT FORMAT DEFINITIONS ---------- */
+
+		format arg_plain 		is "{1}";
+		format arg_offset 		is "&{1}";
+		format arg_imm_byte 	is "b {1}";
+		format arg_imm_word 	is "w {1}";
+		format arg_imm_double 	is "d {1}";
+		format arg_imm_quad 	is "q {1}";
+
+
 		/* ------------ FOR STACK INSTRUCTIONS ------------- */
 
-		// pop dest
-		// push imm/dest
-		// swp
-		// sav
-		
+		mnemonic pop 	(destofs) arg_plain when ofs16;
+		mnemonic push 	for push_ofs (ofs) arg_offset,
+						for push_by_ofs (srcofs) arg_plain when ofs16,
+						for push_b (imm) arg_imm_byte when imm8,
+						for push_w (imm) arg_imm_word when imm16,
+						for push_d (imm) arg_imm_double when imm32,
+						for push_q (imm) arg_imm_quad when imm64;
+		mnemonic swp();
+		mnemonic sav	(destofs) arg_plain when ofs16;
+
 		/* --------- FOR FLOW CONTROL INSTRUCTIONS --------- */
 
 		// jmp
@@ -157,7 +186,7 @@ architecture Goose {
 		
 		/* ---------- FOR ARITHMETIC INSTRUCTIONS ---------- */
 
-		mnemonic add() for add_0;
+		//mnemonic add() for add_0;
 		
 		// sub
 		// inc
