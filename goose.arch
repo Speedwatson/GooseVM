@@ -102,14 +102,19 @@ architecture Goose {
 			other 		= 101
 		};
 
-		encode ofsAndNum sequence = alternatives {
-			num_is_one = { 0000 0001, ofs16 as ofs },
+		encode numOr1AndOfs sequence = alternatives {
+			num_not_defined = { 0000 0001, ofs16 as ofs },
 			defined = { imm8 as num, ofs16 as ofs }
 		};
 
 		encode numOr0 sequence = alternatives {
 			defined = { imm8 as num },
 			default = { 0000 0000 }
+		};
+
+		encode numOr1 sequence = alternatives {
+			defined = { imm8 as num },
+			default = { 0000 0001 }
 		};
 
 
@@ -155,7 +160,7 @@ architecture Goose {
 		instruction jlez 			= { instrType.flowctrl, 1 0100, ofs16 as targetLabel };
 		instruction jlez_by_offset	= { instrType.flowctrl, 1 0101, ofs16 as targetOfsVarPtr };
 
-		instruction call 			= { instrType.flowctrl, 1 0110, sequence ofsAndNum }; // ofsAndNum(num as argsNumber, ofs as subroutineLabel) };
+		instruction call 			= { instrType.flowctrl, 1 0110, sequence numOr1AndOfs }; // numOr1AndOfs(num as argsNumber, ofs as subroutineLabel) };
 //	    instruction call_nargs		= { instrType.flowctrl, 1 0111, ofs16 as subroutineLabel, imm8 as argsNumber };
 		
 		instruction ret 			= { instrType.flowctrl, 1 1000 };
@@ -183,16 +188,26 @@ architecture Goose {
 
 		/* ----------- INPUT/OUTPUT INSTRUCTIONS ---------- */
 		
-		instruction inp_b			= { instrType.io, 0 0000, sequence ofsAndNum }; //imm8 as number, ofs16 as dest };
-		instruction inp_w			= { instrType.io, 0 0001, sequence ofsAndNum }; //imm8 as number, ofs16 as dest };
-		instruction inp_d			= { instrType.io, 0 0010, sequence ofsAndNum }; //imm8 as number, ofs16 as dest };
-		instruction inp_q			= { instrType.io, 0 0011, sequence ofsAndNum }; //imm8 as number, ofs16 as dest };
-		instruction inp_char		= { instrType.io, 0 0100, sequence ofsAndNum }; //imm8 as number, ofs16 as dest };
-		instruction out_b			= { instrType.io, 0 0101, sequence ofsAndNum }; //imm8 as number, ofs16 as src };
-		instruction out_w			= { instrType.io, 0 0110, sequence ofsAndNum }; //imm8 as number, ofs16 as src };
-		instruction out_d			= { instrType.io, 0 0111, sequence ofsAndNum }; //imm8 as number, ofs16 as src };
-		instruction out_q			= { instrType.io, 0 1000, sequence ofsAndNum }; //imm8 as number, ofs16 as src };
-		instruction out_char		= { instrType.io, 0 1001, sequence ofsAndNum }; //imm8 as number, ofs16 as src };
+		instruction inp_b			= { instrType.io, 0 0000, sequence numOr1AndOfs };
+		instruction inp_b_stack		= { instrType.io, 0 0001, sequence numOr1 };
+		instruction inp_w			= { instrType.io, 0 0010, sequence numOr1AndOfs };
+		instruction inp_w_stack		= { instrType.io, 0 0011, sequence numOr1 };
+		instruction inp_d			= { instrType.io, 0 0100, sequence numOr1AndOfs };
+		instruction inp_d_stack		= { instrType.io, 0 0101, sequence numOr1 };
+		instruction inp_q			= { instrType.io, 0 0110, sequence numOr1AndOfs };
+		instruction inp_q_stack		= { instrType.io, 0 0111, sequence numOr1 };
+		instruction inp_char		= { instrType.io, 0 1000, sequence numOr1AndOfs };
+		instruction inp_char_stack	= { instrType.io, 0 1001, sequence numOr1 };
+		instruction out_b			= { instrType.io, 0 1010, sequence numOr1AndOfs };
+		instruction out_b_stack		= { instrType.io, 0 1011, sequence numOr1 };
+		instruction out_w			= { instrType.io, 0 1100, sequence numOr1AndOfs };
+		instruction out_w_stack		= { instrType.io, 0 1101, sequence numOr1 };
+		instruction out_d			= { instrType.io, 0 1110, sequence numOr1AndOfs };
+		instruction out_d_stack		= { instrType.io, 0 1111, sequence numOr1 };
+		instruction out_q			= { instrType.io, 1 0000, sequence numOr1AndOfs };
+		instruction out_q_stack		= { instrType.io, 1 0001, sequence numOr1 };
+		instruction out_char		= { instrType.io, 1 0010, sequence numOr1AndOfs };
+		instruction out_char_stack	= { instrType.io, 1 0011, sequence numOr1 };
 
 
 		/* -------------- OTHER INSTRUCTIONS -------------- */
@@ -256,7 +271,7 @@ architecture Goose {
 		mnemonic jlez 	(targetLabel) arg_plain when ofs16,
 						for jlez_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
 
-		mnemonic call 	(ofs) arg_plain when num_is_one,
+		mnemonic call 	(ofs) arg_plain when num_not_defined,
 						(ofs, num) arg_plain_plain when defined; // call with n args put onto subroutine's stack
 
 		mnemonic ret 	(),
@@ -285,23 +300,38 @@ architecture Goose {
 		/* --------- FOR INPUT/OUTPUT INSTRUCTIONS -------- */
 
 		mnemonic inp 	for inp_b (num, ofs) "{1}b {2}" when defined,
-					 	for inp_b (ofs) "b {1}" when num_is_one,
+					 	for inp_b (ofs) "b {1}" when num_not_defined,
+					 	for inp_b_stack () "b" when default,
+					 	for inp_b_stack (num) "{1}b" when defined,
 					 	for inp_w (num, ofs) "{1}w {2}" when defined,
-					 	for inp_w (ofs) "w {1}" when num_is_one,
+					 	for inp_w (ofs) "w {1}" when num_not_defined,
+					 	for inp_w_stack () "w" when default,
+					 	for inp_w_stack (num) "{1}w" when defined,
 					 	for inp_d (num, ofs) "{1}d {2}" when defined,
-					 	for inp_d (ofs) "d {1}" when num_is_one,
+					 	for inp_d (ofs) "d {1}" when num_not_defined,
+					 	for inp_d_stack () "d" when default,
+					 	for inp_d_stack (num) "{1}d" when defined,
 					 	for inp_q (num, ofs) "{1}q {2}" when defined,
-					 	for inp_q (ofs) "q {1}" when num_is_one;
+					 	for inp_q (ofs) "q {1}" when num_not_defined,
+					 	for inp_q_stack () "q" when default,
+					 	for inp_q_stack (num) "{1}q" when defined;
 	
 		mnemonic out 	for out_b (num, ofs) "{1}b {2}" when defined,
-					 	for out_b (ofs) "b {1}" when num_is_one,
+					 	for out_b (ofs) "b {1}" when num_not_defined,
+					 	for out_b_stack () "b" when default,
+					 	for out_b_stack (num) "{1}b" when defined,
 					 	for out_w (num, ofs) "{1}w {2}" when defined,
-					 	for out_w (ofs) "w {1}" when num_is_one,
+					 	for out_w (ofs) "w {1}" when num_not_defined,
+					 	for out_w_stack () "w" when default,
+					 	for out_w_stack (num) "{1}w" when defined,
 					 	for out_d (num, ofs) "{1}d {2}" when defined,
-					 	for out_d (ofs) "d {1}" when num_is_one,
+					 	for out_d (ofs) "d {1}" when num_not_defined,
+					 	for out_d_stack () "d" when default,
+					 	for out_d_stack (num) "{1}d" when defined,
 					 	for out_q (num, ofs) "{1}q {2}" when defined,
-					 	for out_q (ofs) "q {1}" when num_is_one;
-
+					 	for out_q (ofs) "q {1}" when num_not_defined,
+					 	for out_q_stack () "q" when default,
+					 	for out_q_stack (num) "{1}q" when defined;
 
 		/* ----------- FOR OTHER INSTRUCTIONS ------------- */
 
