@@ -151,12 +151,24 @@ architecture Goose {
 		instruction ret 			= { instrType.flowctrl, 1 1000 };
 		instruction ret_nvalues		= { instrType.flowctrl, 1 1001, imm8 as valuesNumber };
 
+
 		/* ------------ ARITHMETIC INSTRUCTIONS ----------- */
 
-		//instruction add0 = {};
+		instruction add 			= { instrType.arithmetic, 0 0000 };
+		instruction sub 			= { instrType.arithmetic, 0 0001 };
+		instruction inc 			= { instrType.arithmetic, 0 0010 };
+		instruction dec 			= { instrType.arithmetic, 0 0011 };
+		instruction mlt 			= { instrType.arithmetic, 0 0100 };
+		instruction div 			= { instrType.arithmetic, 0 0101 };
+		instruction mod 			= { instrType.arithmetic, 0 0110 };
 
 
 		/* ------------- BITWISE INSTRUCTIONS ------------- */
+
+		instruction not	 			= { instrType.bitwise, 0 0000 };
+		instruction and	 			= { instrType.bitwise, 0 0001 };
+		instruction or	 			= { instrType.bitwise, 0 0010 };
+		instruction xor	 			= { instrType.bitwise, 0 0011 };
 
 
 		/* ----------- INPUT/OUTPUT INSTRUCTIONS ---------- */
@@ -230,21 +242,21 @@ architecture Goose {
 
 		/* ---------- FOR ARITHMETIC INSTRUCTIONS ---------- */
 
-		//mnemonic add() for add_0;
-		
-		// sub
-		// inc
-		// dec
-		// mlt
-		// neg
-		// div
-		// mod
-		
+		mnemonic add();
+		mnemonic sub();
+		mnemonic inc();
+		mnemonic dec();
+		mnemonic mlt();
+		mnemonic div();
+		mnemonic mod();
+
+
 		/* ----------- FOR BITWISE INSTRUCTIONS ----------- */
-		// not
-		// and
-		// or
-		// xor
+
+		mnemonic not();
+		mnemonic and();
+		mnemonic or();
+		mnemonic xor();
 
 
 		/* --------- FOR INPUT/OUTPUT INSTRUCTIONS -------- */
