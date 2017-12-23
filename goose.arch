@@ -102,6 +102,16 @@ architecture Goose {
 			other 		= 101
 		};
 
+		encode ofsAndNum sequence = alternatives {
+			num_is_one = { 0000 0001, ofs16 as ofs },
+			defined = { imm8 as num, ofs16 as ofs }
+		};
+
+		encode numOr0 sequence = alternatives {
+			defined = { imm8 as num },
+			default = { 0000 0000 }
+		};
+
 
 		/* -------------- STACK INSTRUCTIONS -------------- */
 
@@ -145,8 +155,8 @@ architecture Goose {
 		instruction jlez 			= { instrType.flowctrl, 1 0100, ofs16 as targetLabel };
 		instruction jlez_by_offset	= { instrType.flowctrl, 1 0101, ofs16 as targetOfsVarPtr };
 
-		instruction call 			= { instrType.flowctrl, 1 0110, ofs16 as subroutineLabel };
-		instruction call_nargs		= { instrType.flowctrl, 1 0111, ofs16 as subroutineLabel, imm8 as argsNumber };
+		instruction call 			= { instrType.flowctrl, 1 0110, sequence ofsAndNum }; // ofsAndNum(num as argsNumber, ofs as subroutineLabel) };
+//	    instruction call_nargs		= { instrType.flowctrl, 1 0111, ofs16 as subroutineLabel, imm8 as argsNumber };
 		
 		instruction ret 			= { instrType.flowctrl, 1 1000 };
 		instruction ret_nvalues		= { instrType.flowctrl, 1 1001, imm8 as valuesNumber };
@@ -165,18 +175,31 @@ architecture Goose {
 
 		/* ------------- BITWISE INSTRUCTIONS ------------- */
 
-		instruction not	 			= { instrType.bitwise, 0 0000 };
-		instruction and	 			= { instrType.bitwise, 0 0001 };
-		instruction or	 			= { instrType.bitwise, 0 0010 };
-		instruction xor	 			= { instrType.bitwise, 0 0011 };
+		instruction bnot 			= { instrType.bitwise, 0 0000 };
+		instruction band	 			= { instrType.bitwise, 0 0001 };
+		instruction bor	 			= { instrType.bitwise, 0 0010 };
+		instruction bxor	 			= { instrType.bitwise, 0 0011 };
 
 
 		/* ----------- INPUT/OUTPUT INSTRUCTIONS ---------- */
 		
+		instruction inp_b			= { instrType.io, 0 0000, sequence ofsAndNum }; //imm8 as number, ofs16 as dest };
+		instruction inp_w			= { instrType.io, 0 0001, sequence ofsAndNum }; //imm8 as number, ofs16 as dest };
+		instruction inp_d			= { instrType.io, 0 0010, sequence ofsAndNum }; //imm8 as number, ofs16 as dest };
+		instruction inp_q			= { instrType.io, 0 0011, sequence ofsAndNum }; //imm8 as number, ofs16 as dest };
+		instruction inp_char		= { instrType.io, 0 0100, sequence ofsAndNum }; //imm8 as number, ofs16 as dest };
+		instruction out_b			= { instrType.io, 0 0101, sequence ofsAndNum }; //imm8 as number, ofs16 as src };
+		instruction out_w			= { instrType.io, 0 0110, sequence ofsAndNum }; //imm8 as number, ofs16 as src };
+		instruction out_d			= { instrType.io, 0 0111, sequence ofsAndNum }; //imm8 as number, ofs16 as src };
+		instruction out_q			= { instrType.io, 0 1000, sequence ofsAndNum }; //imm8 as number, ofs16 as src };
+		instruction out_char		= { instrType.io, 0 1001, sequence ofsAndNum }; //imm8 as number, ofs16 as src };
+
 
 		/* -------------- OTHER INSTRUCTIONS -------------- */
 
-		instruction nop = { 0000 0000 };
+		instruction nop 			= { 0000 0000 };
+		instruction stop 			= { instrType.other, 0 0000, sequence numOr0 };
+
 
 	
 	mnemonics:
@@ -233,8 +256,8 @@ architecture Goose {
 		mnemonic jlez 	(targetLabel) arg_plain when ofs16,
 						for jlez_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
 
-		mnemonic call 	(subroutineLabel) arg_plain,
-						for call_nargs (subroutineLabel, argsNumber) arg_plain_plain; // call with n args put onto subroutine's stack
+		mnemonic call 	(ofs) arg_plain when num_is_one,
+						(ofs, num) arg_plain_plain when defined; // call with n args put onto subroutine's stack
 
 		mnemonic ret 	(),
 						for ret_nvalues (valuesNumber) arg_plain; // return with n top vals put onto caller's stack ("returned")
@@ -253,30 +276,41 @@ architecture Goose {
 
 		/* ----------- FOR BITWISE INSTRUCTIONS ----------- */
 
-		mnemonic not();
-		mnemonic and();
-		mnemonic or();
-		mnemonic xor();
+		mnemonic bnot();
+		mnemonic band();
+		mnemonic bor();
+		mnemonic bxor();
 
 
 		/* --------- FOR INPUT/OUTPUT INSTRUCTIONS -------- */
-		
-		// nbinp 		// number of byte input
-		// nwinp		// number of word input
-		// ndinp		// number of double word input
-		// nqinp		// number of quadword input
-		// cbinp		// input character as a byte
 
-		//out
-
+		mnemonic inp 	for inp_b (num, ofs) "{1}b {2}" when defined,
+					 	for inp_b (ofs) "b {1}" when num_is_one,
+					 	for inp_w (num, ofs) "{1}w {2}" when defined,
+					 	for inp_w (ofs) "w {1}" when num_is_one,
+					 	for inp_d (num, ofs) "{1}d {2}" when defined,
+					 	for inp_d (ofs) "d {1}" when num_is_one,
+					 	for inp_q (num, ofs) "{1}q {2}" when defined,
+					 	for inp_q (ofs) "q {1}" when num_is_one;
+	
+		mnemonic out 	for out_b (num, ofs) "{1}b {2}" when defined,
+					 	for out_b (ofs) "b {1}" when num_is_one,
+					 	for out_w (num, ofs) "{1}w {2}" when defined,
+					 	for out_w (ofs) "w {1}" when num_is_one,
+					 	for out_d (num, ofs) "{1}d {2}" when defined,
+					 	for out_d (ofs) "d {1}" when num_is_one,
+					 	for out_q (num, ofs) "{1}q {2}" when defined,
+					 	for out_q (ofs) "q {1}" when num_is_one;
 
 
 		/* ----------- FOR OTHER INSTRUCTIONS ------------- */
 
 		mnemonic nop();
+		mnemonic stop 	(num) arg_plain when defined,
+						() when default;
+
 
 		// cmp -> -1 0 1
-		// stop
 
 
 }

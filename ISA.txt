@@ -60,8 +60,8 @@
 001 1 0011	jgez_by_offset	*<ofs16>
 001 1 0100	jlez 			<ofs16>
 001 1 0101	jlez_by_offset	*<ofs16>
-001 1 0110	call 			<ofs16>
-001 1 0111	call_nargs		<ofs16> <imm8> 
+001 1 0110	call 			<ofs16 subroutineLabes> [imm8 argsNumber = 1]
+001 1 0111	// DELETED // call_nargs		<ofs16> 
 001 1 1000	ret 			
 001 1 1001	ret_nvalues		<imm8>
 001 1 1010
@@ -110,10 +110,10 @@
 
 /* ------------- BITWISE INSTRUCTIONS ------------- */
 
-011 0 0000	not
-011 0 0001	and
-011 0 0010	or
-011 0 0011	xor
+011 0 0000	bnot
+011 0 0001	band
+011 0 0010	bor
+011 0 0011	bxor
 011 0 0100
 011 0 0101
 011 0 0110
@@ -145,16 +145,16 @@
  
 /* ----------- INPUT/OUTPUT INSTRUCTIONS ---------- */
 
-100 00000
-100 00001
-100 00010
-100 00011
-100 00100
-100 00101
-100 00110
-100 00111
-100 01000
-100 01001
+100 00000	inp_b			[imm8 number = 1]b <ofs16 dest>
+100 00001	inp_w			[imm8 number = 1]w <ofs16 dest>
+100 00010	inp_d			[imm8 number = 1]d <ofs16 dest>
+100 00011	inp_q			[imm8 number = 1]q <ofs16 dest>
+100 00100	inp_char		[imm8 number = 1]c <ofs16 dest>
+100 00101	out_b 			[imm8 number = 1]b <ofs16 dest>
+100 00110	out_w			[imm8 number = 1]w <ofs16 dest>
+100 00111	out_d			[imm8 number = 1]d <ofs16 dest>
+100 01000	out_q			[imm8 number = 1]q <ofs16 dest>
+100 01001	out_char		[imm8 number = 1]c <ofs16 dest>
 100 01010
 100 01011
 100 01100
@@ -180,7 +180,7 @@
 
 /* -------------- OTHER INSTRUCTIONS -------------- */
 
-101 00000
+101 00000	stop			[imm8 exitCode]
 101 00001
 101 00010
 101 00011
