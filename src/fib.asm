@@ -4,7 +4,7 @@ __start:
 	push 1
 	push 1
 	nbinp
-	pop n
+	pop &n
 
 	jmp cycle
 
