@@ -1,7 +1,0 @@
-Architecture 'Goose' seems to be valid for now.
-Assembling accomplished.
-Binary module written.
-6-6155-4b4a-8d3c-4c3a709b8246\workdir\in.test.asm(2,1): Invalid mnemonic string: push 1
-Assembling failed.
- mnemonic for instruction 'pop'(destofs) 
-Error: Architecture 'Goose' definition not collected.
