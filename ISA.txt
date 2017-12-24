@@ -60,7 +60,7 @@
 51	||	001 1 0011	jgez_by_offset	*<ofs16>
 52	||	001 1 0100	jlez 			<ofs16>
 53	||	001 1 0101	jlez_by_offset	*<ofs16>
-54	||	001 1 0110	call 			<ofs16 subroutineLabel> [imm8 argsNumber = 1]
+54	||	001 1 0110	call 			<ofs16 subroutineLabel> [imm8 argsNumber = 0]
 55	||	001 1 0111	// DELETED // call_nargs		<ofs16> 
 56	||	001 1 1000	ret 			
 57	||	001 1 1001	ret_nvalues		<imm8>

@@ -101,8 +101,8 @@ architecture Goose {
 			other 		= 101
 		};
 
-		encode numOr1AndOfs sequence = alternatives {
-			num_not_defined = { 0000 0001, ofs16 as ofs },
+		encode numOr0AndOfs sequence = alternatives {
+			num_not_defined = { 0000 0000, ofs16 as ofs },
 			defined = { imm8 as num, ofs16 as ofs }
 		};
 
@@ -156,7 +156,7 @@ architecture Goose {
 		instruction jlez 			= { instrType.flowctrl, 1 0100, ofs16 as targetLabel };
 		instruction jlez_by_offset	= { instrType.flowctrl, 1 0101, ofs16 as targetOfsVarPtr };
 
-		instruction call 			= { instrType.flowctrl, 1 0110, sequence numOr1AndOfs }; // numOr1AndOfs(num as argsNumber, ofs as subroutineLabel) };
+		instruction call 			= { instrType.flowctrl, 1 0110, sequence numOr0AndOfs }; // numOr0AndOfs(num as argsNumber, ofs as subroutineLabel) };
 //	    instruction call_nargs		= { instrType.flowctrl, 1 0111, ofs16 as subroutineLabel, imm8 as argsNumber };
 		
 		instruction ret 			= { instrType.flowctrl, 1 1000 };
