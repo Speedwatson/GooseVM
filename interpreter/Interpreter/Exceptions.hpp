@@ -4,7 +4,7 @@
 class Error : public std::exception {
 	std::string msg;
 public:
-	Error(const std::string& message) : msg(message) {};
+	enum ErrorType { etFatal, etRuntime } type;
+	Error(const std::string& message, ErrorType type = etFatal) : msg(message), type(type) {};
 	const char* what() { return msg.c_str(); }
 };
-

@@ -1,8 +1,9 @@
 #include "stdafx.h"
-#include "globals.hpp"
+#include "Globals.hpp"
 #include "Arguments.hpp"
 #include "Exceptions.hpp"
 #include "ExecutableFile.hpp"
+#include "Machine.hpp"
 
 int main(int argc, char* argv[]) {
 	std::vector<std::string> argvec(argc - 1);
@@ -16,19 +17,17 @@ int main(int argc, char* argv[]) {
 			return EXIT_SUCCESS;
 		}
 
-		const ExecutableFile execfile(argvec[0]);
+		Machine machine;
+		ExecutableFile execfile(argvec[0]);
 		
+		int excode = machine.run(&execfile);
+		return excode;
+
 		/*
 			TODO:
-				2) Experiment with .bin files, finding out details, affects and structure (+release/debug + source files integration to runtime exceptions)
-				3.1) Reviewing the structure (including call stack), reviewing fib, implementing fib.asm
-				3.2) Concurrently designing the ISA, adding intructions
 				4) Implementing Machine, machine.run(), running fib.asm
-				5) Writing timsort
-
+				5) Writing merge sort
 		*/
-
-		return EXIT_SUCCESS;
 	}
 	catch (Error& e) {
 		std::cerr << e.what();

@@ -7,5 +7,5 @@
 #include <array>
 #include <exception>
 #include <memory>
-
-//.
+#include <stack>
+#include <cassert>
