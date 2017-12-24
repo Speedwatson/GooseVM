@@ -2,6 +2,13 @@
 
 #include "BinaryFileReader.hpp"
 
+typedef int8_t imm8_t;
+typedef int16_t imm16_t;
+typedef int32_t imm32_t;
+typedef int64_t imm64_t;
+typedef uint16_t ofs16_t;
+
+
 class ExecutableFile {
 public:
 	ExecutableFile(std::string filename);
@@ -86,9 +93,12 @@ public:
 	};
 
 	struct Blob {
-		std::vector<bool> bits;
+		uint8_t* bytes = nullptr;
+		int32_t len;
+
+		~Blob() { if (bytes) delete[] bytes; }
 		void read_length(BinaryFileReader& bin);
-		void read_opcode(BinaryFileReader& bin);
+		void read_data(BinaryFileReader& bin);
 	};
 
 	std::vector<Section> sections;
@@ -98,4 +108,17 @@ public:
 	std::vector<SourceCodePoint> sourceCodePoints;
 	std::vector<Blob> blobs;
 	std::vector<std::string> strings;
+
+	Blob* code = nullptr;
+	Blob* data = nullptr;
+	Blob* consts = nullptr;
+	ofs16_t start = 0;
+
+	void* getDataPtr(ofs16_t ofs);
+	void* getCodePtr(ofs16_t ofs);
+	void* getConstsPtr(ofs16_t ofs);
+
+private:
+	void* getPtrFromBlob(Blob* blob, ofs16_t ofs, std::string blobName);
+
 };

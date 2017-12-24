@@ -23,7 +23,7 @@ ExecutableFile::ExecutableFile(std::string filename) {
 	for (auto& sourceTextRange : sourceTextRanges)		sourceTextRange.read(bin);
 	for (auto& sourceCodePoint : sourceCodePoints)		sourceCodePoint.read(bin);
 	for (auto& blob : blobs)							blob.read_length(bin);
-	for (auto& blob : blobs)							blob.read_opcode(bin);
+	for (auto& blob : blobs)							blob.read_data(bin);
 
 	for (auto& string : strings) {
 		uint32_t len;
@@ -37,7 +37,65 @@ ExecutableFile::ExecutableFile(std::string filename) {
 		}
 	}
 	
+	// finding important blobs
+	int codeSectionIndex = -1;
+	int foundMask = 0b000;
+	for (int i = 0; i < sections.size(); ++i) {
+		auto& section = sections[i];
+
+		if (strings[section.bankNameIndex] == "__data") {
+			data = &blobs[section.blobIndex];
+			foundMask |= 0b001;
+		}
+		else if (strings[section.bankNameIndex] == "__consts") {
+			consts = &blobs[section.blobIndex];
+			foundMask |= 0b010;
+		}
+		else if (strings[section.bankNameIndex] == "__code") {
+			code = &blobs[section.blobIndex];
+			codeSectionIndex = i;
+			foundMask |= 0b100;
+		}
+
+		if (foundMask == 0b111) break;
+	}
+
+	if (codeSectionIndex == -1) throw Error("Bad executable: no __code section found.");
+
+	// finding __start
+	for (auto symbol : symbols) {
+		if (strings[symbol.nameIndex] == "__start") {
+			start = symbol.blobEntryIndex;
+			break;
+		}
+	}
 }
+
+void* ExecutableFile::getDataPtr(ofs16_t ofs) {
+	return getPtrFromBlob(data, ofs, "data");
+}
+
+void* ExecutableFile::getCodePtr(ofs16_t ofs) {
+	return getPtrFromBlob(code, ofs, "code");
+}
+
+void* ExecutableFile::getConstsPtr(ofs16_t ofs) {
+	return getPtrFromBlob(consts, ofs, "consts");
+}
+
+void* ExecutableFile::getPtrFromBlob(Blob* blob, ofs16_t ofs, std::string blobName) {
+	if (!blob) {
+		assert(false);
+		throw Error("Attempt to operate with __" + blobName + " by offset " + std::to_string(ofs) + "when there's no such a section");
+	}
+	if (ofs >= blob->len) {
+		assert(false);
+		throw Error("Attempt to gain access to __" + blobName + " by offset " + std::to_string(ofs) + " - access violation");
+	}
+
+	return blob->bytes + ofs;
+}
+
 
 void ExecutableFile::ModuleHeader::read(BinaryFileReader& bin){
 	bin >> signature1
@@ -104,20 +162,11 @@ void ExecutableFile::SourceCodePoint::read(BinaryFileReader & bin) {
 }
 
 void ExecutableFile::Blob::read_length(BinaryFileReader & bin) {
-	uint32_t len_bytes;
-	bin >> len_bytes;
-	bits.resize(len_bytes * 8);
+	bin >> len;
+	if (len) bytes = new uint8_t[len];
 }
 
-void ExecutableFile::Blob::read_opcode(BinaryFileReader & bin) {
-	for (int byte_i = 0; byte_i < bits.size() / 8; ++byte_i) {
-		uint8_t byte;
-		bin >> byte;
-
-		uint8_t mask = 0b10000000;
-		for (int bit_i = 0; bit_i < 8; ++bit_i) {
-			bits[byte_i * 8 + bit_i] = byte & mask;
-			mask >>= 1;
-		}
-	}
+void ExecutableFile::Blob::read_data(BinaryFileReader & bin) {
+	for (int i = 0; i < len; ++i) bin >> bytes[i];
 }
+  
