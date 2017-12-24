@@ -180,7 +180,7 @@
 
 /* -------------- OTHER INSTRUCTIONS -------------- */
 
-160	||	101 0 0000	stop			[imm8 exitCode]
+160	||	101 0 0000	stop			[imm8 exitCode = 0]
 161	||	101 0 0001	stop_ecstack	pop
 162	||	101 0 0010	
 163	||	101 0 0011
