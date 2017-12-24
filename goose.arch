@@ -324,10 +324,4 @@ architecture Goose {
 
 
 		// cmp -> -1 0 1
-
-
-
-//push 1 is push_b, not push_by_ofs? push_by_ofs is push *n? YEAH!
-//push 
-
 }
