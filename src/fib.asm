@@ -1,25 +1,25 @@
 [section __code]
 
 __start:
-	push 1
-	push 1
+	push q 1
+	push q 1
 	inp b n
 
 	jmp cycle
 
 cycle:
 	; checking whether we've got the answer
-	push 2
+	push b 2
 	push *n
 	jle answer
 
 	; decreasing n
 	push *n
 	dec
-	pop n
+	pop n b
 
 	; calculating the next pair
-	sav t
+	sav t q
 	add
 	push *t
 	swp
@@ -27,7 +27,7 @@ cycle:
 	jmp cycle
 
 answer:
-	out
+	out q
 	stop 0
 	
 
