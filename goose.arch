@@ -224,48 +224,48 @@ architecture Goose {
 
 		/* ------------ FOR STACK INSTRUCTIONS ------------- */
 
-		mnemonic pop 	(destofs) arg_plain when ofs16;
+		mnemonic pop 	(destofs) arg_plain;
 
-		mnemonic push 	for push_ofs (ofs) arg_plain when ofs16,
-						for push_b (number) "{1}" when imm8,
-						for push_w (number) "w {1}" when imm16,
-						for push_d (number) "d {1}" when imm32,
-						for push_q (number) "q {1}" when imm64,
-						for push_by_ofs_b (srcofs) "*{1}" when ofs16,
-						for push_by_ofs_w (srcofs) "w *{1}" when ofs16,
-						for push_by_ofs_d (srcofs) "d *{1}" when ofs16,
-						for push_by_ofs_q (srcofs) "q *{1}" when ofs16;
+		mnemonic push 	for push_ofs (ofs) arg_plain,
+						for push_b (number) "b {1}",
+						for push_w (number) "w {1}",
+						for push_d (number) "d {1}",
+						for push_q (number) "q {1}",
+						for push_by_ofs_b (srcofs) "*{1}",
+						for push_by_ofs_w (srcofs) "w *{1}",
+						for push_by_ofs_d (srcofs) "d *{1}",
+						for push_by_ofs_q (srcofs) "q *{1}";
 						
 		mnemonic swp();
-		mnemonic sav	(destofs) arg_plain when ofs16;
+		mnemonic sav	(destofs) arg_plain;
 
 
 		/* --------- FOR FLOW CONTROL INSTRUCTIONS --------- */
 
-		mnemonic jmp 	(targetLabel) arg_plain when ofs16,
-						for jmp_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
+		mnemonic jmp 	(targetLabel) arg_plain,
+						for jmp_by_offset (targetOfsVarPtr) arg_dereference;
 
-		mnemonic je 	(targetLabel) arg_plain when ofs16,
-						for je_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
-		mnemonic jl 	(targetLabel) arg_plain when ofs16,
-						for jl_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
-		mnemonic jg 	(targetLabel) arg_plain when ofs16,
-						for jg_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
-		mnemonic jle 	(targetLabel) arg_plain when ofs16,
-						for jle_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
-		mnemonic jge 	(targetLabel) arg_plain when ofs16,
-						for jge_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
+		mnemonic je 	(targetLabel) arg_plain,
+						for je_by_offset (targetOfsVarPtr) arg_dereference;
+		mnemonic jl 	(targetLabel) arg_plain,
+						for jl_by_offset (targetOfsVarPtr) arg_dereference;
+		mnemonic jg 	(targetLabel) arg_plain,
+						for jg_by_offset (targetOfsVarPtr) arg_dereference;
+		mnemonic jle 	(targetLabel) arg_plain,
+						for jle_by_offset (targetOfsVarPtr) arg_dereference;
+		mnemonic jge 	(targetLabel) arg_plain,
+						for jge_by_offset (targetOfsVarPtr) arg_dereference;
 
-		mnemonic jez 	(targetLabel) arg_plain when ofs16,
-						for jez_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
-		mnemonic jgz 	(targetLabel) arg_plain when ofs16,
-						for jgz_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
-		mnemonic jlz 	(targetLabel) arg_plain when ofs16,
-						for jlz_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
-		mnemonic jgez 	(targetLabel) arg_plain when ofs16,
-						for jgez_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
-		mnemonic jlez 	(targetLabel) arg_plain when ofs16,
-						for jlez_by_offset (targetOfsVarPtr) arg_dereference when ofs16;
+		mnemonic jez 	(targetLabel) arg_plain,
+						for jez_by_offset (targetOfsVarPtr) arg_dereference;
+		mnemonic jgz 	(targetLabel) arg_plain,
+						for jgz_by_offset (targetOfsVarPtr) arg_dereference;
+		mnemonic jlz 	(targetLabel) arg_plain,
+						for jlz_by_offset (targetOfsVarPtr) arg_dereference;
+		mnemonic jgez 	(targetLabel) arg_plain,
+						for jgez_by_offset (targetOfsVarPtr) arg_dereference;
+		mnemonic jlez 	(targetLabel) arg_plain,
+						for jlez_by_offset (targetOfsVarPtr) arg_dereference;
 
 		mnemonic call 	(ofs) arg_plain when num_not_defined,
 						(ofs, num) arg_plain_plain when defined; // call with n args put onto subroutine's stack
@@ -295,22 +295,22 @@ architecture Goose {
 
 		/* --------- FOR INPUT/OUTPUT INSTRUCTIONS -------- */
 
-		mnemonic inp 	for inp_b (dest) "b {1}" when ofs16,
+		mnemonic inp 	for inp_b (dest) "b {1}",
 					 	for inp_b_stack () "b",
-					 	for inp_w (dest) "w {1}" when ofs16,
+					 	for inp_w (dest) "w {1}",
 					 	for inp_w_stack () "w",
-					 	for inp_d (dest) "d {1}" when ofs16,
+					 	for inp_d (dest) "d {1}",
 					 	for inp_d_stack () "d",
-					 	for inp_q (dest) "q {1}" when ofs16,
+					 	for inp_q (dest) "q {1}",
 					 	for inp_q_stack () "q",
-					 	for inp_char (dest) "c {1}" when ofs16,
+					 	for inp_char (dest) "c {1}",
 					 	for inp_char_stack () "c";
 	
-		mnemonic out 	for out_b (src) "b {1}" when ofs16,
-						for out_w (src) "w {1}" when ofs16,
-						for out_d (src) "d {1}" when ofs16,
-						for out_q (src) "q {1}" when ofs16,
-						for out_char (src) "c {1}" when ofs16,
+		mnemonic out 	for out_b (src) "b {1}",
+						for out_w (src) "w {1}",
+						for out_d (src) "d {1}",
+						for out_q (src) "q {1}",
+						for out_char (src) "c {1}",
 						for out_stack ();
 					 	
 
