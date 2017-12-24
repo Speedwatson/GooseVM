@@ -38,17 +38,17 @@ private:
 		&Machine::push_by_ofs_w,		// 000 0 1000
 		&Machine::push_by_ofs_d,		// 000 0 1001
 		&Machine::push_by_ofs_q,		// 000 0 1010
-		nullptr,				// 000 0 1011
-		&Machine::sav,				// 000 0 1100
-		nullptr,					// 000 0 1101
-		&Machine::pop_b,					// 000 0 1110
-		&Machine::pop_w,					// 000 0 1111
-		&Machine::pop_d,					// 000 1 0000
-		&Machine::pop_q,					// 000 1 0001
-		&Machine::swp_b,					// 000 1 0010
-		&Machine::swp_w,					// 000 1 0011
-		&Machine::swp_d,					// 000 1 0100
-		&Machine::swp_q,					// 000 1 0101
+		&Machine::swp,				// 000 0 1011
+		nullptr,				// 000 0 1100
+		&Machine::pop_b,					// 000 0 1101
+		&Machine::pop_w,					// 000 0 1110
+		&Machine::pop_d,					// 000 0 1111
+		&Machine::pop_q,					// 000 1 0000
+		&Machine::sav_b,					// 000 1 0001
+		&Machine::sav_w,					// 000 1 0010
+		&Machine::sav_d,					// 000 1 0011
+		&Machine::sav_q,					// 000 1 0100
+		nullptr,					// 000 1 0101
 		nullptr,					// 000 1 0110
 		nullptr,					// 000 1 0111
 		nullptr,					// 000 1 1000
@@ -165,16 +165,16 @@ private:
 		&Machine::inp_q_stack,		// 100 0 0111
 		&Machine::inp_char,			// 100 0 1000
 		&Machine::inp_char_stack,		// 100 0 1001
-		&Machine::out_b,				// 100 0 1010
-		&Machine::out_w,				// 100 0 1011
-		&Machine::out_d,				// 100 0 1100
-		&Machine::out_q,				// 100 0 1101
-		&Machine::out_char,			// 100 0 1110
-		&Machine::out_stack,			// 100 0 1111
-		nullptr,					// 100 1 0000
-		nullptr,					// 100 1 0001
-		nullptr,					// 100 1 0010
-		nullptr,					// 100 1 0011
+		&Machine::out_b, 				//100 0 1010
+		&Machine::out_b_stack,			//100 0 1011
+		&Machine::out_w,				//100 0 1100
+		&Machine::out_w_stack,			//100 0 1101
+		&Machine::out_d,				//100 0 1110
+		&Machine::out_d_stack,			//100 0 1111
+		&Machine::out_q,				//100 1 0000
+		&Machine::out_q_stack,			//100 1 0001
+		&Machine::out_char,				//100 1 0010
+		&Machine::out_char_stack,		//100 1 0011
 		nullptr,					// 100 1 0100
 		nullptr,					// 100 1 0101
 		nullptr,					// 100 1 0110
@@ -299,6 +299,39 @@ private:
 	void jump_if(bool (comparator)(val_t, val_t), bool by_ofs = false);
 	void jump_if_unary(bool (function)(val_t), bool by_ofs = false);
 
+	template<typename T>
+	void input(bool to_stack = false, bool forced_num = false) {
+		if (forced_num)	imm64_t val;
+		else T val;
+
+		std::cout >> val;
+
+		++ip;
+		if (to_stack) stack.push(val);
+		else {
+			ofs16_t destOfs = read<ofs16_t>(ef->getCodePtr(ip));
+			*(T*)ef->getDataPtr(destOfs) = val;
+		}
+	}
+
+	template<typename T>
+	void output(bool from_stack = false, bool forced_num = false) {
+		if (forced_num)	imm64_t val;
+		else T val;
+
+		++ip;
+		if (from_stack) {
+			val = stack.top();
+			stack.pop();
+		}
+		else {
+			ofs16_t destOfs = read<ofs16_t>(ef->getCodePtr(ip));
+			val = *(T*)ef->getDataPtr(destOfs);
+		}
+
+		std::cout << val;
+	}
+
 	void nop();
 	void push_ofs();
 	void push_b();
@@ -364,11 +397,15 @@ private:
 	void inp_char();
 	void inp_char_stack();
 	void out_b();
+	void out_b_stack();
 	void out_w();
+	void out_w_stack();
 	void out_d();
+	void out_d_stack();
 	void out_q();
+	void out_q_stack();
 	void out_char();
-	void out_stack();
+	void out_char_stack();
 	void stop();
 	void stop_ecstack();
 };

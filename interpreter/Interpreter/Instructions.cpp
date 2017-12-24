@@ -99,7 +99,7 @@ void Machine::jmp_by_offset() {
 	ip = targetOfs;
 }
 
-void Machine::jump_if(bool (comparator)(val_t, val_t), bool by_ofs = false) {
+void Machine::jump_if(bool (comparator)(val_t, val_t), bool by_ofs) {
 	ofs16_t targetOfs = read<ofs16_t>(ef->getCodePtr(++ip));
 	if (by_ofs) targetOfs = read<ofs16_t>(ef->getDataPtr(targetOfs), false);
 
@@ -116,7 +116,7 @@ void Machine::jump_if(bool (comparator)(val_t, val_t), bool by_ofs = false) {
 	if (comparator(top, pretop)) ip = targetOfs;
 }
 
-void Machine::jump_if_unary(bool (function)(val_t), bool by_ofs = false) {
+void Machine::jump_if_unary(bool (function)(val_t), bool by_ofs) {
 	ofs16_t targetOfs = read<ofs16_t>(ef->getCodePtr(++ip));
 	if (by_ofs) targetOfs = read<ofs16_t>(ef->getDataPtr(targetOfs), false);
 
@@ -228,6 +228,11 @@ void Machine::call() {
 }
 
 void Machine::ret() {
+	if (csz == -1) {
+		exit = EXIT_SUCCESS;
+		return;
+	}
+
 	imm8_t argsNumber = read<imm8_t>(ef->getCodePtr(++ip));
 
 	if (stack.size() < csz + argsNumber) {
@@ -338,47 +343,47 @@ void Machine::bxor() {
 }
 
 void Machine::inp_b() {
-	// INSTR TODO
+	input<imm8_t>(false, true);
 }
 
 void Machine::inp_b_stack() {
-	// INSTR TODO
+	input<imm8_t>(true, true);
 }
 
 void Machine::inp_w() {
-	// INSTR TODO
+	input<imm16_t>();
 }
 
 void Machine::inp_w_stack() {
-	// INSTR TODO
+	input<imm16_t>(true);
 }
 
 void Machine::inp_d() {
-	// INSTR TODO
+	input<imm32_t>();
 }
 
 void Machine::inp_d_stack() {
-	// INSTR TODO
+	input<imm32_t>(true);
 }
 
 void Machine::inp_q() {
-	// INSTR TODO
+	input<imm64_t>();
 }
 
 void Machine::inp_q_stack() {
-	// INSTR TODO
+	input<imm64_t>(true);
 }
 
 void Machine::inp_char() {
-	// INSTR TODO
+	input<char>();
 }
 
 void Machine::inp_char_stack() {
-	// INSTR TODO
+	input<char>(true);
 }
 
 void Machine::out_b() {
-	// INSTR TODO
+	output<imm8_t>(false, true);
 }
 
 void Machine::out_w() {

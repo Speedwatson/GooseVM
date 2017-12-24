@@ -156,15 +156,15 @@
 136	||	100 0 1000	inp_char			c <ofs16 dest>
 137	||	100 0 1001	inp_char_stack		c
 138	||	100 0 1010	out_b 				b <ofs16 src>
-139	||	100 0 1011	out_w				w <ofs16 src>
-140	||	100 0 1100	out_d				d <ofs16 src>
-141	||	100 0 1101	out_q				q <ofs16 src>
-142	||	100 0 1110	out_char			c <ofs16 src>
-143	||	100 0 1111	out_stack				
-144	||	100 1 0000	
-145	||	100 1 0001	
-146	||	100 1 0010	
-147	||	100 1 0011
+139	||	100 0 1011	out_b_stack			b
+140	||	100 0 1100	out_w				w <ofs16 src>
+141	||	100 0 1101	out_w_stack			w
+142	||	100 0 1110	out_d				d <ofs16 src>
+143	||	100 0 1111	out_d_stack			d
+144	||	100 1 0000	out_q				q <ofs16 src>
+145	||	100 1 0001	out_q_stack			q
+146	||	100 1 0010	out_char			c <ofs16 src>
+147	||	100 1 0011	out_char_stack		c
 148	||	100 1 0100	
 149	||	100 1 0101
 150	||	100 1 0110

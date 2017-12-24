@@ -203,11 +203,15 @@ architecture Goose {
 		instruction inp_char_stack	= { instrType.io, 0 1001 };
 
 		instruction out_b			= { instrType.io, 0 1010, ofs16 as src };
-		instruction out_w			= { instrType.io, 0 1011, ofs16 as src };
-		instruction out_d			= { instrType.io, 0 1100, ofs16 as src };
-		instruction out_q			= { instrType.io, 0 1101, ofs16 as src };
-		instruction out_char		= { instrType.io, 0 1110, ofs16 as src };
-		instruction out_stack		= { instrType.io, 0 1111 };
+		instruction out_b_stack		= { instrType.io, 0 1011 };
+		instruction out_w			= { instrType.io, 0 1100, ofs16 as src };
+		instruction out_w_stack		= { instrType.io, 0 1101 };
+		instruction out_d			= { instrType.io, 0 1110, ofs16 as src };
+		instruction out_d_stack		= { instrType.io, 0 1111 };
+		instruction out_q			= { instrType.io, 1 0000, ofs16 as src };
+		instruction out_q_stack		= { instrType.io, 1 0001 };
+		instruction out_char		= { instrType.io, 1 0010, ofs16 as src };
+		instruction out_char_stack	= { instrType.io, 1 0011 };
 
 
 		/* -------------- OTHER INSTRUCTIONS -------------- */
@@ -250,7 +254,7 @@ architecture Goose {
 		mnemonic sav 	for sav_b (destofs) "{1} b",
 						for sav_w (destofs) "{1} w",
 						for sav_d (destofs) "{1} d",
-						for sav_q (destofs) "{1} q";
+						for sav_q (destofs) "{1} q";	
 
 
 		/* --------- FOR FLOW CONTROL INSTRUCTIONS --------- */
@@ -320,11 +324,15 @@ architecture Goose {
 					 	for inp_char_stack () "c";
 	
 		mnemonic out 	for out_b (src) "b {1}",
-						for out_w (src) "w {1}",
-						for out_d (src) "d {1}",
-						for out_q (src) "q {1}",
-						for out_char (src) "c {1}",
-						for out_stack ();
+					 	for out_b_stack () "b",
+					 	for out_w (src) "w {1}",
+					 	for out_w_stack () "w",
+					 	for out_d (src) "d {1}",
+					 	for out_d_stack () "d",
+					 	for out_q (src) "q {1}",
+					 	for out_q_stack () "q",
+					 	for out_char (src) "c {1}",
+					 	for out_char_stack () "c";
 					 	
 
 
