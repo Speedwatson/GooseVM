@@ -3,34 +3,32 @@
 __start:
 	push 1
 	push 1
-	nbinp
-	pop &n
+	inp b n
 
 	jmp cycle
 
 cycle:
 	; checking whether we've got the answer
 	push 2
-	push n
+	push *n
 	jle answer
 
 	; decreasing n
-	push n
+	push *n
 	dec
 	pop n
 
 	; calculating the next pair
 	sav t
 	add
-	push t
+	push *t
 	swp
 
 	jmp cycle
 
 answer:
 	out
-	push 0
-	stop
+	stop 0
 	
 
 [section __data]

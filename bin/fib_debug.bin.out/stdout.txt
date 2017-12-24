@@ -1,3 +1,0 @@
-Architecture 'Goose' seems to be valid for now.
-Assembling accomplished.
-Binary module written.

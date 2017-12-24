@@ -1,9 +1,14 @@
 Architecture 'Goose' seems to be valid for now.
-C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(4,1): Invalid mnemonic string: push 1
-C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(5,1): Invalid mnemonic string: push 1
-C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(6,1): Invalid mnemonic string: nbinp
-C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(7,1): Invalid mnemonic string: pop &n
-C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(9,1): Invalid mnemonic string: jmp cycle
+Assembling accomplished.
+Binary module written.
+ch(230,18): Failed to resolve instruction for mnemonic 'push'(number) with constraint 'imm16'
+Failed to resolve mnemonic for instruction 'push_b'(number) 
+Error: Architecture 'Goose' definition not collected.
+ring: push 1
+C:\RemoteTasks.Workspace\Sessions\Assemble_be86f42a-e44d-4fe1-b189-7c3c80ee8850\workdir\in.fib.asm(12,1): Invalid mnemonic string: push 2
+C:\RemoteTasks.Workspace\Sessions\Assemble_be86f42a-e44d-4fe1-b189-7c3c80ee8850\workdir\in.fib.asm(19,1): Invalid mnemonic string: pop *n
+Assembling failed.
+e\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(9,1): Invalid mnemonic string: jmp cycle
 C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(13,1): Invalid mnemonic string: push 2
 C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(14,1): Invalid mnemonic string: push n
 C:\RemoteTasks.Workspace\Sessions\Assemble_8176392a-d6a8-4770-b1b8-ae7c4cd46d29\workdir\in.fib.asm(15,1): Invalid mnemonic string: jle answer
