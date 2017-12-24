@@ -32,22 +32,21 @@ architecture Goose {
 		storage STACK_STORAGE[32];									/* A little-endian physical storage to serve for stack maintaining purposes: */
 																	/* [0 .. SSZ .. 15 ][ 16 .. CSZ .. 31] */
 
-		storage SYSTEM_STORAGE[16];									/* A little-endian physical storage for system essential data: */
+//		storage SYSTEM_STORAGE[16];									/* A little-endian physical storage for system essential data: */
 																	/* [0 .. ERR .. 15] */
-
 
 		view SSZ = STACK_STORAGE[0..15];							/* A view for the current Stack Size storage */
 
 		view CSZ = STACK_STORAGE[16..31];							/* A view for the subroutine Caller's stack Size storage at the entry point */
 																	/* For "main" or "root" subroutine it's -1 */
 
-		view ERR = SYSTEM_STORAGE[0..15];							/* A view for the current error code storage */
-
-		/*
-			ERROR CODES:
-				0 - No error
-
-		*/
+//		view ERR = SYSTEM_STORAGE[0..15];							/* A view for the current error code storage */
+//
+//		/*
+//			ERROR CODES:
+//				0 - No error
+//				
+//		*/
 		
 	memory:
 		range mCode[0x0000..0xFFFF] {
