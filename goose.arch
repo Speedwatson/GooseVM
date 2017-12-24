@@ -2,7 +2,7 @@
 	GOOSE ARCHITECTURE v1.0
 			  __
 			>(' )
-			  )/   .`
+			  )/    ~
 			 /(____/\
 			/        )
 			\ `  =~~/
@@ -208,6 +208,7 @@ architecture Goose {
 
 		instruction nop 			= { 0000 0000 };
 		instruction stop 			= { instrType.other, 0 0000, sequence numOr0 };
+		instruction stop_ecstack 	= { instrType.other, 0 0001 };
 
 
 	
@@ -318,7 +319,8 @@ architecture Goose {
 
 		mnemonic nop();
 		mnemonic stop 	(num) arg_plain when defined,
-						() when default;
+						() when default,
+						for stop_ecstack () "pop";
 
 
 		// cmp -> -1 0 1
