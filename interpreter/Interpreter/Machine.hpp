@@ -3,6 +3,7 @@
 #include "ExecutableFile.hpp"
 
 #define ROOT_CSZ -1
+#define CONTINUE_EXIT_CODE -1
 typedef int64_t val_t;
 
 class Machine {
@@ -16,7 +17,7 @@ private:
 	std::stack<val_t> stack;
 	ExecutableFile* ef;
 
-	int exit = 0;
+	int exit = CONTINUE_EXIT_CODE;
 
 	template<typename T>
 	T read(void* ptr, bool incIP = true) {
@@ -293,7 +294,7 @@ private:
 		val_t top = stack.top();
 		if (pop) stack.pop();
 
-		*(T*)destPtr = top.val;
+		*(T*)destPtr = top;
 	}
 
 	void jump_if(bool (comparator)(val_t, val_t), bool by_ofs = false);
@@ -301,10 +302,15 @@ private:
 
 	template<typename T>
 	void input(bool to_stack = false, bool forced_num = false) {
-		if (forced_num)	imm64_t val;
-		else T val;
+		imm64_t valnum;
+		T val;
 
-		std::cout >> val;
+		if (forced_num) {
+			std::cin >> valnum;
+			val = valnum;
+		}
+		else std::cin >> val;
+		
 
 		++ip;
 		if (to_stack) stack.push(val);
@@ -316,8 +322,8 @@ private:
 
 	template<typename T>
 	void output(bool from_stack = false, bool forced_num = false) {
-		if (forced_num)	imm64_t val;
-		else T val;
+		imm64_t valnum;
+		T val;
 
 		++ip;
 		if (from_stack) {
@@ -329,7 +335,11 @@ private:
 			val = *(T*)ef->getDataPtr(destOfs);
 		}
 
-		std::cout << val;
+		if (forced_num) {
+			valnum = val;
+			std::cout << valnum;
+		}
+		else std::cout << val;
 	}
 
 	void nop();

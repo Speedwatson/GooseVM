@@ -266,6 +266,7 @@ void Machine::add() {
 	val_t pretop = stack.top();
 	stack.pop();
 	stack.push(top + pretop);
+	++ip;
 }
 
 void Machine::sub() {
@@ -274,18 +275,21 @@ void Machine::sub() {
 	val_t pretop = stack.top();
 	stack.pop();
 	stack.push(top - pretop);
+	++ip;
 }
 
 void Machine::inc() {
 	val_t top = stack.top();
 	stack.pop();
 	stack.push(top + 1);
+	++ip;
 }
 
 void Machine::dec() {
 	val_t top = stack.top();
 	stack.pop();
 	stack.push(top - 1);
+	++ip;
 }
 
 void Machine::mlt() {
@@ -294,6 +298,7 @@ void Machine::mlt() {
 	val_t pretop = stack.top();
 	stack.pop();
 	stack.push(top * pretop);
+	++ip;
 }
 
 void Machine::div() {
@@ -302,6 +307,7 @@ void Machine::div() {
 	val_t pretop = stack.top();
 	stack.pop();
 	stack.push(top / pretop);
+	++ip;
 }
 
 void Machine::mod() {
@@ -310,12 +316,14 @@ void Machine::mod() {
 	val_t pretop = stack.top();
 	stack.pop();
 	stack.push(top % pretop);
+	++ip;
 }
 
 void Machine::bnot() {
 	val_t top = stack.top();
 	stack.pop();
 	stack.push(!top);
+	++ip; ++ip;
 }
 
 void Machine::band() {
@@ -324,6 +332,7 @@ void Machine::band() {
 	val_t pretop = stack.top();
 	stack.pop();
 	stack.push(top & pretop);
+	++ip;
 }
 
 void Machine::bor() {
@@ -332,6 +341,7 @@ void Machine::bor() {
 	val_t pretop = stack.top();
 	stack.pop();
 	stack.push(top | pretop);
+	++ip;
 }
 
 void Machine::bxor() {
@@ -340,6 +350,7 @@ void Machine::bxor() {
 	val_t pretop = stack.top();
 	stack.pop();
 	stack.push(top ^ pretop);
+	++ip;
 }
 
 void Machine::inp_b() {
@@ -386,30 +397,49 @@ void Machine::out_b() {
 	output<imm8_t>(false, true);
 }
 
-void Machine::out_w() {
-	// INSTR TODO
+void Machine::out_b_stack() {
+	output<imm8_t>(true, true);
 }
 
+void Machine::out_w() {
+	output<imm16_t>();
+}
+
+void Machine::out_w_stack() {
+	output<imm16_t>(true);
+}
+
+
 void Machine::out_d() {
-	// INSTR TODO
+	output<imm32_t>();
+}
+
+void Machine::out_d_stack() {
+	output<imm32_t>(true);
 }
 
 void Machine::out_q() {
-	// INSTR TODO
+	output<imm64_t>();
+}
+
+void Machine::out_q_stack() {
+	output<imm64_t>(true);
 }
 
 void Machine::out_char() {
-	// INSTR TODO
+	output<char>();
 }
 
-void Machine::out_stack() {
-	// INSTR TODO
+void Machine::out_char_stack() {
+	output<char>(true);
 }
 
 void Machine::stop() {
-	// INSTR TODO
+	exit = read<imm8_t>(ef->getCodePtr(++ip));
 }
 
 void Machine::stop_ecstack() {
-	// INSTR TODO
+	++ip;
+	exit = stack.top();
+	stack.pop();
 }

@@ -13,7 +13,7 @@ int Machine::run(ExecutableFile* execfile) {
 	do {
 		uint8_t opcode = *(uint8_t*)ef->getCodePtr(ip);
 		(this->*handler[opcode])();
-	} while (!exit);
+	} while (exit == CONTINUE_EXIT_CODE);
 	
 	return exit;
 }
