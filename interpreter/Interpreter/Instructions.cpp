@@ -6,80 +6,86 @@ void Machine::nop() {
 	return;
 }
 
-void Machine::stack_to_mem(bool pop = false) {
-	ofs16_t destOfs = read<ofs16_t>(ef->getCodePtr(++ip));
-	void* destPtr = ef->getDataPtr(destOfs);
-
-	Entry top = stack.top();
-	if (pop) stack.pop();
-
-	switch (top.type)
-	{
-	case Entry::etB: *(imm8_t*)destPtr = top.val;
-	case Entry::etW: *(imm16_t*)destPtr = top.val;
-	case Entry::etD: *(imm32_t*)destPtr = top.val;
-	case Entry::etQ: *(imm64_t*)destPtr = top.val;
-	case Entry::etOfs: *(ofs16_t*)destPtr = top.val;
-	default: assert(false);
-	}
-}
-
-void Machine::pop() {
-	stack_to_mem(true);
-}
-
 void Machine::push_ofs() {
-	stack.push(Entry(read<ofs16_t>(ef->getCodePtr(++ip)), Entry::etOfs));
+	stack.push(read<ofs16_t>(ef->getCodePtr(++ip)));
 }
 
 void Machine::push_b() {
-	stack.push(Entry(read<imm8_t>(ef->getCodePtr(++ip)), Entry::etB));
+	stack.push(read<imm8_t>(ef->getCodePtr(++ip)));
 }
 
 void Machine::push_w() {
-	stack.push(Entry(read<imm16_t>(ef->getCodePtr(++ip)), Entry::etW));
+	stack.push(read<imm16_t>(ef->getCodePtr(++ip)));
 }
 
 void Machine::push_d() {
-	stack.push(Entry(read<imm32_t>(ef->getCodePtr(++ip)), Entry::etD));
+	stack.push(read<imm32_t>(ef->getCodePtr(++ip)));
 }
 
 void Machine::push_q() {
-	stack.push(Entry(read<imm64_t>(ef->getCodePtr(++ip)), Entry::etQ));
+	stack.push(read<imm64_t>(ef->getCodePtr(++ip)));
 }
 
 void Machine::push_by_ofs_b() {
 	ofs16_t srcofs = read<ofs16_t>(ef->getCodePtr(++ip));
-	stack.push(Entry(read<imm8_t>(ef->getDataPtr(srcofs), false), Entry::etB));
+	stack.push(read<imm8_t>(ef->getDataPtr(srcofs), false));
 }
 
 void Machine::push_by_ofs_w() {
 	ofs16_t srcofs = read<ofs16_t>(ef->getCodePtr(++ip));
-	stack.push(Entry(read<imm16_t>(ef->getDataPtr(srcofs), false), Entry::etW));
+	stack.push(read<imm16_t>(ef->getDataPtr(srcofs), false));
 }
 
 void Machine::push_by_ofs_d() {
 	ofs16_t srcofs = read<ofs16_t>(ef->getCodePtr(++ip));
-	stack.push(Entry(read<imm32_t>(ef->getDataPtr(srcofs), false), Entry::etD));
+	stack.push(read<imm32_t>(ef->getDataPtr(srcofs), false));
 }
 
 void Machine::push_by_ofs_q() {
 	ofs16_t srcofs = read<ofs16_t>(ef->getCodePtr(++ip));
-	stack.push(Entry(read<imm64_t>(ef->getDataPtr(srcofs), false), Entry::etQ));
+	stack.push(read<imm64_t>(ef->getDataPtr(srcofs), false));
 }
 
 void Machine::swp() {
-	Entry top = stack.top();
+	val_t top = stack.top();
 	stack.pop();
-	Entry pretop = stack.top();
+	val_t pretop = stack.top();
 	stack.pop();
 	stack.push(top);
 	stack.push(pretop);
 	++ip;
 }
 
-void Machine::sav() {
-	stack_to_mem();
+void Machine::pop_b() {
+	stack_to_mem<imm8_t>(true);
+}
+
+void Machine::pop_w() {
+	stack_to_mem<imm16_t>(true);
+}
+
+void Machine::pop_d() {
+	stack_to_mem<imm32_t>(true);
+}
+
+void Machine::pop_q() {
+	stack_to_mem<imm64_t>(true);
+}
+
+void Machine::sav_b() {
+	stack_to_mem<imm8_t>();
+}
+
+void Machine::sav_w() {
+	stack_to_mem<imm16_t>();
+}
+
+void Machine::sav_d() {
+	stack_to_mem<imm32_t>();
+}
+
+void Machine::sav_q() {
+	stack_to_mem<imm64_t>();
 }
 
 void Machine::jmp() {
@@ -93,118 +99,118 @@ void Machine::jmp_by_offset() {
 	ip = targetOfs;
 }
 
-void Machine::jump_if(bool (comparator)(uint64_t, uint64_t), bool by_ofs = false) {
+void Machine::jump_if(bool (comparator)(val_t, val_t), bool by_ofs = false) {
 	ofs16_t targetOfs = read<ofs16_t>(ef->getCodePtr(++ip));
 	if (by_ofs) targetOfs = read<ofs16_t>(ef->getDataPtr(targetOfs), false);
 
-	Entry top = stack.top();
+	val_t top = stack.top();
 	stack.pop();
-	Entry pretop = stack.top();
+	val_t pretop = stack.top();
 	stack.pop();
 
-	if (top.type != pretop.type) {
-		assert(false);
-		throw Error("Tried to compare two different types (on stack) in jump instruction.");
-	}
+	//if (top.type != pretop.type) {
+	//	assert(false);
+	//	throw Error("Tried to compare two different types (on stack) in jump instruction.");
+	//}
 
-	if (comparator(top.val, pretop.val)) ip = targetOfs;
+	if (comparator(top, pretop)) ip = targetOfs;
 }
 
-void Machine::jump_if_unary(bool (function)(uint64_t), bool by_ofs = false) {
+void Machine::jump_if_unary(bool (function)(val_t), bool by_ofs = false) {
 	ofs16_t targetOfs = read<ofs16_t>(ef->getCodePtr(++ip));
 	if (by_ofs) targetOfs = read<ofs16_t>(ef->getDataPtr(targetOfs), false);
 
-	Entry top = stack.top();
+	val_t top = stack.top();
 	stack.pop();
 
-	if (function(top.val)) ip = targetOfs;
+	if (function(top)) ip = targetOfs;
 }
 
 void Machine::je() {
-	jump_if([](uint64_t top, uint64_t pretop) -> bool { return top == pretop; });
+	jump_if([](val_t top, val_t pretop) -> bool { return top == pretop; });
 }
 
 void Machine::je_by_offset() {
-	jump_if([](uint64_t top, uint64_t pretop) -> bool { return top == pretop; }, true);
+	jump_if([](val_t top, val_t pretop) -> bool { return top == pretop; }, true);
 }
 
 void Machine::jl() {
-	jump_if([](uint64_t top, uint64_t pretop) -> bool { return top < pretop; });
+	jump_if([](val_t top, val_t pretop) -> bool { return top < pretop; });
 }
 
 void Machine::jl_by_offset() {
-	jump_if([](uint64_t top, uint64_t pretop) -> bool { return top < pretop; }, true);
+	jump_if([](val_t top, val_t pretop) -> bool { return top < pretop; }, true);
 }
 
 void Machine::jg() {
-	jump_if([](uint64_t top, uint64_t pretop) -> bool { return top > pretop; });
+	jump_if([](val_t top, val_t pretop) -> bool { return top > pretop; });
 }
 
 void Machine::jg_by_offset() {
-	jump_if([](uint64_t top, uint64_t pretop) -> bool { return top > pretop; }, true);
+	jump_if([](val_t top, val_t pretop) -> bool { return top > pretop; }, true);
 }
 
 void Machine::jle() {
-	jump_if([](uint64_t top, uint64_t pretop) -> bool { return top <= pretop; });
+	jump_if([](val_t top, val_t pretop) -> bool { return top <= pretop; });
 }
 
 void Machine::jle_by_offset() {
-	jump_if([](uint64_t top, uint64_t pretop) -> bool { return top <= pretop; }, true);
+	jump_if([](val_t top, val_t pretop) -> bool { return top <= pretop; }, true);
 }
 
 void Machine::jge() {
-	jump_if([](uint64_t top, uint64_t pretop) -> bool { return top >= pretop; });
+	jump_if([](val_t top, val_t pretop) -> bool { return top >= pretop; });
 }
 
 void Machine::jge_by_offset() {
-	jump_if([](uint64_t top, uint64_t pretop) -> bool { return top >= pretop; }, true);
+	jump_if([](val_t top, val_t pretop) -> bool { return top >= pretop; }, true);
 }
 
 void Machine::jez() {
-	jump_if_unary([](uint64_t top) -> bool { return top == 0; });
+	jump_if_unary([](val_t top) -> bool { return top == 0; });
 }
 
 void Machine::jez_by_offset() {
-	jump_if_unary([](uint64_t top) -> bool { return top == 0; }, true);
+	jump_if_unary([](val_t top) -> bool { return top == 0; }, true);
 }
 
 void Machine::jgz() {
-	jump_if_unary([](uint64_t top) -> bool { return top > 0; });
+	jump_if_unary([](val_t top) -> bool { return top > 0; });
 }
 
 void Machine::jgz_by_offset() {
-	jump_if_unary([](uint64_t top) -> bool { return top > 0; }, true);
+	jump_if_unary([](val_t top) -> bool { return top > 0; }, true);
 }
 
 void Machine::jlz() {
-	jump_if_unary([](uint64_t top) -> bool { return top < 0; });
+	jump_if_unary([](val_t top) -> bool { return top < 0; });
 }
 
 void Machine::jlz_by_offset() {
-	jump_if_unary([](uint64_t top) -> bool { return top < 0; }, true);
+	jump_if_unary([](val_t top) -> bool { return top < 0; }, true);
 }
 
 void Machine::jgez() {
-	jump_if_unary([](uint64_t top) -> bool { return top >= 0; });
+	jump_if_unary([](val_t top) -> bool { return top >= 0; });
 }
 
 void Machine::jgez_by_offset() {
-	jump_if_unary([](uint64_t top) -> bool { return top >= 0; }, true);
+	jump_if_unary([](val_t top) -> bool { return top >= 0; }, true);
 }
 
 void Machine::jlez() {
-	jump_if_unary([](uint64_t top) -> bool { return top <= 0; });
+	jump_if_unary([](val_t top) -> bool { return top <= 0; });
 }
 
 void Machine::jlez_by_offset() {
-	jump_if_unary([](uint64_t top) -> bool { return top <= 0; }, true);
+	jump_if_unary([](val_t top) -> bool { return top <= 0; }, true);
 }
 
 void Machine::call() {
 	ofs16_t targetOfs = read<ofs16_t>(ef->getCodePtr(++ip));
 	imm8_t argsNumber = read<imm8_t>(ef->getCodePtr(ip));
 
-	std::vector<Entry> args(argsNumber);
+	std::vector<val_t> args(argsNumber);
 	for (int i = argsNumber - 1; i >=0; ++i) {
 		args[i] = stack.top();
 		stack.pop();
@@ -212,8 +218,8 @@ void Machine::call() {
 
 	for (auto entry : args) stack.push(entry); // preserving caller's arguments on its stack by default
 
-	stack.push(Entry(ip, Entry::etOfs));
-	stack.push(Entry(csz, Entry::etW));
+	stack.push(ip);
+	stack.push(csz);
 	csz = stack.size();
 
 	for (auto entry : args) stack.push(entry);
@@ -232,70 +238,103 @@ void Machine::ret() {
 
 	while (stack.size() > csz + argsNumber) stack.pop();
 
-	std::vector<Entry> values(argsNumber);
+	std::vector<val_t> values(argsNumber);
 	for (int i = argsNumber - 1; i >= 0; ++i) {
 		values[i] = stack.top();
 		stack.pop();
 	}
 
-	assert(stack.top().type == Entry::etW); // else stack corruption
-	csz = stack.top().val;
+	//assert(stack.top().type == Entry::etW); // else stack corruption
+	csz = stack.top();
 	stack.pop();
 
-	assert(stack.top().type == Entry::etOfs); // else stack corruption
-	ip = stack.top().val;
+	//assert(stack.top().type == Entry::etOfs); // else stack corruption
+	ip = stack.top();
 	stack.pop();
 
 	for (auto entry : values) stack.push(entry);
 }
 
 void Machine::add() {
-	Entry top = stack.top();
+	val_t top = stack.top();
 	stack.pop();
-	Entry pretop = stack.top();
+	val_t pretop = stack.top();
 	stack.pop();
-	
-
+	stack.push(top + pretop);
 }
 
 void Machine::sub() {
-	// INSTR TODO
+	val_t top = stack.top();
+	stack.pop();
+	val_t pretop = stack.top();
+	stack.pop();
+	stack.push(top - pretop);
 }
 
 void Machine::inc() {
-	// INSTR TODO
+	val_t top = stack.top();
+	stack.pop();
+	stack.push(top + 1);
 }
 
 void Machine::dec() {
-	// INSTR TODO
+	val_t top = stack.top();
+	stack.pop();
+	stack.push(top - 1);
 }
 
 void Machine::mlt() {
-	// INSTR TODO
+	val_t top = stack.top();
+	stack.pop();
+	val_t pretop = stack.top();
+	stack.pop();
+	stack.push(top * pretop);
 }
 
 void Machine::div() {
-	// INSTR TODO
+	val_t top = stack.top();
+	stack.pop();
+	val_t pretop = stack.top();
+	stack.pop();
+	stack.push(top / pretop);
 }
 
 void Machine::mod() {
-	// INSTR TODO
+	val_t top = stack.top();
+	stack.pop();
+	val_t pretop = stack.top();
+	stack.pop();
+	stack.push(top % pretop);
 }
 
 void Machine::bnot() {
-	// INSTR TODO
+	val_t top = stack.top();
+	stack.pop();
+	stack.push(!top);
 }
 
 void Machine::band() {
-	// INSTR TODO
+	val_t top = stack.top();
+	stack.pop();
+	val_t pretop = stack.top();
+	stack.pop();
+	stack.push(top & pretop);
 }
 
 void Machine::bor() {
-	// INSTR TODO
+	val_t top = stack.top();
+	stack.pop();
+	val_t pretop = stack.top();
+	stack.pop();
+	stack.push(top | pretop);
 }
 
 void Machine::bxor() {
-	// INSTR TODO
+	val_t top = stack.top();
+	stack.pop();
+	val_t pretop = stack.top();
+	stack.pop();
+	stack.push(top ^ pretop);
 }
 
 void Machine::inp_b() {

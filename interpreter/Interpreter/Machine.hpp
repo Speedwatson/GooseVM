@@ -3,13 +3,7 @@
 #include "ExecutableFile.hpp"
 
 #define ROOT_CSZ -1
-
-struct Entry {
-	int64_t val;
-	enum Type { etB, etW, etD, etQ, etOfs } type;
-
-	Entry(int64_t val, Type type) { this->type = type; this->val = val; }
-};
+typedef int64_t val_t;
 
 class Machine {
 public:
@@ -19,7 +13,7 @@ private:
 	uint16_t csz = ROOT_CSZ;
 	ofs16_t ip = 0;
 
-	std::stack<Entry> stack;
+	std::stack<val_t> stack;
 	ExecutableFile* ef;
 
 	int exit = 0;
@@ -291,9 +285,19 @@ private:
 		nullptr,					// 111 1 1111
 	};
 
-	void stack_to_mem(bool pop = false);
-	void jump_if(bool (comparator)(uint64_t, uint64_t), bool by_ofs = false);
-	void jump_if_unary(bool (function)(uint64_t), bool by_ofs = false);
+	template<typename T>
+	void stack_to_mem(bool pop = false) {
+		ofs16_t destOfs = read<ofs16_t>(ef->getCodePtr(++ip));
+		void* destPtr = ef->getDataPtr(destOfs);
+
+		val_t top = stack.top();
+		if (pop) stack.pop();
+
+		*(T*)destPtr = top.val;
+	}
+
+	void jump_if(bool (comparator)(val_t, val_t), bool by_ofs = false);
+	void jump_if_unary(bool (function)(val_t), bool by_ofs = false);
 
 	void nop();
 	void push_ofs();
@@ -309,11 +313,11 @@ private:
 	void pop_w();
 	void pop_d();
 	void pop_q();
-	void swp_b();
-	void swp_w();
-	void swp_d();
-	void swp_q();
-	void sav();
+	void swp();
+	void sav_b();
+	void sav_w();
+	void sav_d();
+	void sav_q();
 	void jmp();
 	void jmp_by_offset();
 	void je();
