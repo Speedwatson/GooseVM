@@ -118,6 +118,7 @@
     <ClCompile Include="Arguments.cpp" />
     <ClCompile Include="BinaryFileReader.cpp" />
     <ClCompile Include="ExecutableFile.cpp" />
+    <ClCompile Include="Instructions.cpp" />
     <ClCompile Include="Interpreter.cpp" />
     <ClCompile Include="Machine.cpp" />
   </ItemGroup>
