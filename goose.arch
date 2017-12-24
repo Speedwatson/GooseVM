@@ -159,8 +159,8 @@ architecture Goose {
 		instruction call 			= { instrType.flowctrl, 1 0110, sequence numOr0AndOfs }; // numOr0AndOfs(num as argsNumber, ofs as subroutineLabel) };
 //	    instruction call_nargs		= { instrType.flowctrl, 1 0111, ofs16 as subroutineLabel, imm8 as argsNumber };
 		
-		instruction ret 			= { instrType.flowctrl, 1 1000 };
-		instruction ret_nvalues		= { instrType.flowctrl, 1 1001, imm8 as valuesNumber };
+		instruction ret 			= { instrType.flowctrl, 1 1000, sequence numOr0 };
+//		instruction ret_nvalues		= { instrType.flowctrl, 1 1001, imm8 as valuesNumber };
 
 
 		/* ------------ ARITHMETIC INSTRUCTIONS ----------- */
@@ -269,8 +269,8 @@ architecture Goose {
 		mnemonic call 	(ofs) arg_plain when num_not_defined,
 						(ofs, num) arg_plain_plain when defined; // call with n args put onto subroutine's stack
 
-		mnemonic ret 	(),
-						for ret_nvalues (valuesNumber) arg_plain; // return with n top vals put onto caller's stack ("returned")
+		mnemonic ret 	() when default,
+						(num) arg_plain when defined; // return with n top vals put onto caller's stack ("returned")
 
 
 		/* ---------- FOR ARITHMETIC INSTRUCTIONS ---------- */
