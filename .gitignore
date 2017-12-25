@@ -5,3 +5,5 @@ interpreter/**/Debug
 interpreter/**/Release
 interpreter/**/*.aps
 # remote-tasks
+*.ilk
+*.pdb
