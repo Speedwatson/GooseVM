@@ -7,21 +7,22 @@ __start:
 
 	jmp cycle
 
+
 cycle:
 	; checking whether we've got the answer
 	push b 2
-	push *n
+	push b *n
 	jle answer
 
 	; decreasing n
-	push *n
+	push b *n
 	dec
-	pop n b
+	pop b n
 
 	; calculating the next pair
-	sav t q
+	sav q t
 	add
-	push *t
+	push q *t
 	swp
 
 	jmp cycle
@@ -29,8 +30,9 @@ cycle:
 answer:
 	out q
 	stop 0
-	
+
 
 [section __data]
 n:	resb 1
 t:	resq 1
+

@@ -9,3 +9,4 @@
 #include <memory>
 #include <stack>
 #include <cassert>
+#include <intrin.h>

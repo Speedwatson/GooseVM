@@ -13,7 +13,7 @@ int Machine::run(ExecutableFile* execfile) {
 	do {
 		uint8_t opcode = *(uint8_t*)ef->getCodePtr(ip);
 		(this->*handler[opcode])();
-	} while (exit == CONTINUE_EXIT_CODE);
+	} while (exit == CONTINUE_EXIT_CODE && ip < ef->code->len);
 	
-	return exit;
+	return std::max(0, exit);
 }

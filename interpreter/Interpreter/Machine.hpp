@@ -11,7 +11,7 @@ public:
 	int run(ExecutableFile* execfile);
 
 private:
-	uint16_t csz = ROOT_CSZ;
+	int32_t csz = ROOT_CSZ;
 	ofs16_t ip = 0;
 
 	std::stack<val_t> stack;
@@ -40,7 +40,7 @@ private:
 		&Machine::push_by_ofs_d,		// 000 0 1001
 		&Machine::push_by_ofs_q,		// 000 0 1010
 		&Machine::swp,				// 000 0 1011
-		nullptr,				// 000 0 1100
+		&Machine::dpl,				// 000 0 1100
 		&Machine::pop_b,					// 000 0 1101
 		&Machine::pop_w,					// 000 0 1110
 		&Machine::pop_d,					// 000 0 1111
@@ -190,7 +190,7 @@ private:
 		nullptr,					// 100 1 1111
 		&Machine::stop,				// 101 0 0000
 		&Machine::stop_ecstack,		// 101 0 0001
-		nullptr,					// 101 0 0010
+		&Machine::brk,					// 101 0 0010
 		nullptr,					// 101 0 0011
 		nullptr,					// 101 0 0100
 		nullptr,					// 101 0 0101
@@ -294,7 +294,7 @@ private:
 		val_t top = stack.top();
 		if (pop) stack.pop();
 
-		*(T*)destPtr = top;
+		*(T*)destPtr = (T)top;
 	}
 
 	void jump_if(bool (comparator)(val_t, val_t), bool by_ofs = false);
@@ -307,7 +307,7 @@ private:
 
 		if (forced_num) {
 			std::cin >> valnum;
-			val = valnum;
+			val = (T)valnum;
 		}
 		else std::cin >> val;
 		
@@ -357,6 +357,7 @@ private:
 	void pop_d();
 	void pop_q();
 	void swp();
+	void dpl();
 	void sav_b();
 	void sav_w();
 	void sav_d();
@@ -418,4 +419,5 @@ private:
 	void out_char_stack();
 	void stop();
 	void stop_ecstack();
+	void brk();
 };

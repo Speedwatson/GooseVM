@@ -56,6 +56,10 @@ void Machine::swp() {
 	++ip;
 }
 
+void Machine::dpl() {
+	stack.push(stack.top());
+}
+
 void Machine::pop_b() {
 	stack_to_mem<imm8_t>(true);
 }
@@ -207,17 +211,17 @@ void Machine::jlez_by_offset() {
 }
 
 void Machine::call() {
-	ofs16_t targetOfs = read<ofs16_t>(ef->getCodePtr(++ip));
-	imm8_t argsNumber = read<imm8_t>(ef->getCodePtr(ip));
+	imm8_t argsNumber = read<imm8_t>(ef->getCodePtr(++ip));
+	ofs16_t targetOfs = read<ofs16_t>(ef->getCodePtr(ip));
 
 	std::vector<val_t> args(argsNumber);
-	for (int i = argsNumber - 1; i >=0; ++i) {
+	for (int i = argsNumber - 1; i >=0; --i) {
 		args[i] = stack.top();
 		stack.pop();
 	}
-
-	for (auto entry : args) stack.push(entry); // preserving caller's arguments on its stack by default
-
+	
+	// for (auto entry : args) stack.push(entry); // POPPING caller's arguments on its stack by default - use dpl to save them
+	
 	stack.push(ip);
 	stack.push(csz);
 	csz = stack.size();
@@ -228,7 +232,7 @@ void Machine::call() {
 }
 
 void Machine::ret() {
-	if (csz == -1) {
+	if (csz == ROOT_CSZ) {
 		exit = EXIT_SUCCESS;
 		return;
 	}
@@ -244,7 +248,7 @@ void Machine::ret() {
 	while (stack.size() > csz + argsNumber) stack.pop();
 
 	std::vector<val_t> values(argsNumber);
-	for (int i = argsNumber - 1; i >= 0; ++i) {
+	for (int i = argsNumber - 1; i >= 0; --i) {
 		values[i] = stack.top();
 		stack.pop();
 	}
@@ -442,4 +446,8 @@ void Machine::stop_ecstack() {
 	++ip;
 	exit = stack.top();
 	stack.pop();
+}
+
+void Machine::brk() {
+	__debugbreak();
 }

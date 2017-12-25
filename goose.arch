@@ -20,8 +20,6 @@ architecture Goose {
 
 		Private internal names:
 			mName 		- memory range
-			efName	 	- encoded field
-			esName		- encoded sequence
 
 		Public names:
 			Registsers should be written in CAPS.
@@ -37,7 +35,7 @@ architecture Goose {
 
 		view SSZ = STACK_STORAGE[0..15];							/* A view for the current Stack Size storage */
 
-		view CSZ = STACK_STORAGE[16..31];							/* A view for the subroutine Caller's stack Size storage at the entry point */
+		view CSZ = STACK_STORAGE[16..31];							/* A view for the subroutine caller's stack Size storage at the entry point */
 																	/* For "main" or "root" subroutine it's -1 */
 
 //		view ERR = SYSTEM_STORAGE[0..15];							/* A view for the current error code storage */
@@ -111,6 +109,11 @@ architecture Goose {
 			default = { 0000 0000 }
 		};
 
+		encode numOr1 sequence = alternatives {
+			defined = { imm8 as num },
+			default = { 0000 0001 }
+		};
+
 		/* -------------- STACK INSTRUCTIONS -------------- */
 
 		// instruction nop 			= { 0000 0000 }; - declared in OTHER INSTRUCTIONS
@@ -125,6 +128,7 @@ architecture Goose {
 		instruction push_by_ofs_d	= { instrType.stack, 0 1001, ofs16 as srcofs };
 		instruction push_by_ofs_q	= { instrType.stack, 0 1010, ofs16 as srcofs };
 		instruction swp			 	= { instrType.stack, 0 1011 };
+		instruction dpl				= { instrType.stack, 0 1100, sequence numOr1 };
 		
 		instruction pop_b 			= { instrType.stack, 0 1101, ofs16 as destofs };
 		instruction pop_w 			= { instrType.stack, 0 1110, ofs16 as destofs };
@@ -134,6 +138,7 @@ architecture Goose {
 		instruction sav_w		 	= { instrType.stack, 1 0010, ofs16 as destofs };
 		instruction sav_d		 	= { instrType.stack, 1 0011, ofs16 as destofs };
 		instruction sav_q		 	= { instrType.stack, 1 0100, ofs16 as destofs };
+
 
 		
 		/* ----------- FLOW CONTROL INSTRUCTIONS ---------- */
@@ -220,6 +225,8 @@ architecture Goose {
 		instruction stop 			= { instrType.other, 0 0000, sequence numOr0 };
 		instruction stop_ecstack 	= { instrType.other, 0 0001 };
 
+		instruction brk				= { instrType.other, 0 0010 };
+
 
 	
 	mnemonics:
@@ -231,30 +238,35 @@ architecture Goose {
 
 		format arg_plain_plain  is "{1} {2}";
 
+		format arg_numOr1		of () when default,
+								(num) "{1}" when defined;
+
 
 		/* ------------ FOR STACK INSTRUCTIONS ------------- */
 
-		mnemonic push 	for push_ofs (ofs) arg_plain,
+		mnemonic push 	for push_ofs (ofs) "&{1}",
 						for push_b (number) "b {1}",
 						for push_w (number) "w {1}",
 						for push_d (number) "d {1}",
 						for push_q (number) "q {1}",
-						for push_by_ofs_b (srcofs) "*{1}",
+						for push_by_ofs_b (srcofs) "b *{1}",
 						for push_by_ofs_w (srcofs) "w *{1}",
 						for push_by_ofs_d (srcofs) "d *{1}",
 						for push_by_ofs_q (srcofs) "q *{1}";
 						
 		mnemonic swp();
+		mnemonic dpl	(...) arg_numOr1;
 
-		mnemonic pop 	for pop_b (destofs) "{1} b",
-						for pop_w (destofs) "{1} w",
-						for pop_d (destofs) "{1} d",
-						for pop_q (destofs) "{1} q";
+		mnemonic pop 	for pop_b (destofs) "b {1}",
+						for pop_w (destofs) "w {1}",
+						for pop_d (destofs) "d {1}",
+						for pop_q (destofs) "q {1}";
 
-		mnemonic sav 	for sav_b (destofs) "{1} b",
-						for sav_w (destofs) "{1} w",
-						for sav_d (destofs) "{1} d",
-						for sav_q (destofs) "{1} q";	
+		mnemonic sav 	for sav_b (destofs) "b {1}",
+						for sav_w (destofs) "w {1}",
+						for sav_d (destofs) "d {1}",
+						for sav_q (destofs) "q {1}";	
+
 
 
 		/* --------- FOR FLOW CONTROL INSTRUCTIONS --------- */
@@ -285,7 +297,7 @@ architecture Goose {
 						for jlez_by_offset (targetOfsVarPtr) arg_dereference;
 
 		mnemonic call 	(ofs) arg_plain when num_not_defined,
-						(ofs, num) arg_plain_plain when defined; // call with n args put onto subroutine's stack
+ 						(ofs, num) arg_plain_plain when defined; // call with n args put onto subroutine's stack
 
 		mnemonic ret 	() when default,
 						(num) arg_plain when defined; // return with n top vals put onto caller's stack ("returned")
@@ -342,6 +354,8 @@ architecture Goose {
 		mnemonic stop 	(num) arg_plain when defined,
 						() when default,
 						for stop_ecstack () "pop";
+
+		mnemonic brk();
 
 
 		// cpy: copy value from constants to data
