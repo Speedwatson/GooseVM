@@ -57,7 +57,16 @@ void Machine::swp() {
 }
 
 void Machine::dpl() {
-	stack.push(stack.top());
+	imm8_t num = read<imm8_t>(ef->getCodePtr(++ip));
+
+	assert(num > 0);
+	std::vector<val_t> vals(num);
+	for (auto it = vals.rbegin(); it != vals.rend(); ++it) {
+		*it = stack.top();
+		stack.pop();
+	}
+
+	for (auto& val : vals) stack.push(val);
 }
 
 void Machine::pop_b() {
@@ -327,7 +336,7 @@ void Machine::bnot() {
 	val_t top = stack.top();
 	stack.pop();
 	stack.push(!top);
-	++ip; ++ip;
+	++ip;
 }
 
 void Machine::band() {
@@ -449,5 +458,6 @@ void Machine::stop_ecstack() {
 }
 
 void Machine::brk() {
+	++ip;
 	__debugbreak();
 }

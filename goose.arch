@@ -21,7 +21,7 @@ architecture Goose {
 		Private internal names:
 			mName 		- memory range
 
-		Public names:
+		Public names: 
 			Registsers should be written in CAPS.
 			Mnemonics are written in lower case.
 	*/
@@ -257,15 +257,15 @@ architecture Goose {
 		mnemonic swp();
 		mnemonic dpl	(...) arg_numOr1;
 
-		mnemonic pop 	for pop_b (destofs) "b {1}",
-						for pop_w (destofs) "w {1}",
-						for pop_d (destofs) "d {1}",
-						for pop_q (destofs) "q {1}";
+		mnemonic pop 	for pop_b (destofs) "b *{1}",
+						for pop_w (destofs) "w *{1}",
+						for pop_d (destofs) "d *{1}",
+						for pop_q (destofs) "q *{1}";
 
-		mnemonic sav 	for sav_b (destofs) "b {1}",
-						for sav_w (destofs) "w {1}",
-						for sav_d (destofs) "d {1}",
-						for sav_q (destofs) "q {1}";	
+		mnemonic sav 	for sav_b (destofs) "b *{1}",
+						for sav_w (destofs) "w *{1}",
+						for sav_d (destofs) "d *{1}",
+						for sav_q (destofs) "q *{1}";	
 
 
 
@@ -324,26 +324,26 @@ architecture Goose {
 
 		/* --------- FOR INPUT/OUTPUT INSTRUCTIONS -------- */
 
-		mnemonic inp 	for inp_b (dest) "b {1}",
+		mnemonic inp 	for inp_b (dest) "b *{1}",
 					 	for inp_b_stack () "b",
-					 	for inp_w (dest) "w {1}",
+					 	for inp_w (dest) "w *{1}",
 					 	for inp_w_stack () "w",
-					 	for inp_d (dest) "d {1}",
+					 	for inp_d (dest) "d *{1}",
 					 	for inp_d_stack () "d",
-					 	for inp_q (dest) "q {1}",
+					 	for inp_q (dest) "q *{1}",
 					 	for inp_q_stack () "q",
-					 	for inp_char (dest) "c {1}",
+					 	for inp_char (dest) "c *{1}",
 					 	for inp_char_stack () "c";
 	
-		mnemonic out 	for out_b (src) "b {1}",
+		mnemonic out 	for out_b (src) "b *{1}",
 					 	for out_b_stack () "b",
-					 	for out_w (src) "w {1}",
+					 	for out_w (src) "w *{1}",
 					 	for out_w_stack () "w",
-					 	for out_d (src) "d {1}",
+					 	for out_d (src) "d *{1}",
 					 	for out_d_stack () "d",
-					 	for out_q (src) "q {1}",
+					 	for out_q (src) "q *{1}",
 					 	for out_q_stack () "q",
-					 	for out_char (src) "c {1}",
+					 	for out_char (src) "c *{1}",
 					 	for out_char_stack () "c";
 					 	
 

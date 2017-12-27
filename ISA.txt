@@ -15,14 +15,14 @@
 10	||	000 0 1010	push_by_ofs_q	q *<ofs16>
 11	||	000 0 1011	swp
 12	||	000 0 1100	dpl				[imm8 = 1]
-13	||	000 0 1101	pop_b			b <ofs16>
-14	||	000 0 1110	pop_w			w <ofs16>
-15	||	000 0 1111	pop_d			d <ofs16>
-16	||	000 1 0000	pop_q			q <ofs16>
-17	||	000 1 0001 	sav_b 			b <ofs16>
-18	||	000 1 0010 	sav_w 			w <ofs16>
-19	||	000 1 0011 	sav_d 			d <ofs16>
-20	||	000 1 0100 	sav_q 			q <ofs16>
+13	||	000 0 1101	pop_b			b *<ofs16>
+14	||	000 0 1110	pop_w			w *<ofs16>
+15	||	000 0 1111	pop_d			d *<ofs16>
+16	||	000 1 0000	pop_q			q *<ofs16>
+17	||	000 1 0001 	sav_b 			b *<ofs16>
+18	||	000 1 0010 	sav_w 			w *<ofs16>
+19	||	000 1 0011 	sav_d 			d *<ofs16>
+20	||	000 1 0100 	sav_q 			q *<ofs16>
 21	||	000 1 0101
 22	||	000 1 0110
 23	||	000 1 0111
@@ -61,9 +61,9 @@
 52	||	001 1 0100	jlez 			<ofs16>
 53	||	001 1 0101	jlez_by_offset	*<ofs16>
 54	||	001 1 0110	call 			<ofs16 subroutineLabel> [imm8 argsNumber = 0]
-55	||	001 1 0111	// DELETED // call_nargs		<ofs16> 
+55	||	001 1 0111	
 56	||	001 1 1000	ret 			[imm8 valuesNumber = 0]			
-57	||	001 1 1001	// DELETED // ret_nvalues		<imm8>
+57	||	001 1 1001	
 58	||	001 1 1010
 59	||	001 1 1011
 60	||	001 1 1100
@@ -145,25 +145,25 @@
  
 /* ----------- INPUT/OUTPUT INSTRUCTIONS ---------- */
 
-128	||	100 0 0000	inp_b				b <ofs16 dest>
+128	||	100 0 0000	inp_b				b *<ofs16 dest>
 129	||	100 0 0001	inp_b_stack			b
-130	||	100 0 0010	inp_w				w <ofs16 dest>
+130	||	100 0 0010	inp_w				w *<ofs16 dest>
 131	||	100 0 0011	inp_w_stack			w
-132	||	100 0 0100	inp_d				d <ofs16 dest>
+132	||	100 0 0100	inp_d				d *<ofs16 dest>
 133	||	100 0 0101	inp_d_stack			d
-134	||	100 0 0110	inp_q				q <ofs16 dest>
+134	||	100 0 0110	inp_q				q *<ofs16 dest>
 135	||	100 0 0111	inp_q_stack			q
-136	||	100 0 1000	inp_char			c <ofs16 dest>
+136	||	100 0 1000	inp_char			c *<ofs16 dest>
 137	||	100 0 1001	inp_char_stack		c
-138	||	100 0 1010	out_b 				b <ofs16 src>
+138	||	100 0 1010	out_b 				b *<ofs16 src>
 139	||	100 0 1011	out_b_stack			b
-140	||	100 0 1100	out_w				w <ofs16 src>
+140	||	100 0 1100	out_w				w *<ofs16 src>
 141	||	100 0 1101	out_w_stack			w
-142	||	100 0 1110	out_d				d <ofs16 src>
+142	||	100 0 1110	out_d				d *<ofs16 src>
 143	||	100 0 1111	out_d_stack			d
-144	||	100 1 0000	out_q				q <ofs16 src>
+144	||	100 1 0000	out_q				q *<ofs16 src>
 145	||	100 1 0001	out_q_stack			q
-146	||	100 1 0010	out_char			c <ofs16 src>
+146	||	100 1 0010	out_char			c *<ofs16 src>
 147	||	100 1 0011	out_char_stack		c
 148	||	100 1 0100	
 149	||	100 1 0101
