@@ -11,9 +11,10 @@ int Machine::run(ExecutableFile* execfile) {
 	stack.push(ROOT_CSZ);
 
 	do {
-		uint8_t opcode = *(uint8_t*)ef->getCodePtr(ip);
-		(this->*handler[opcode])();
+		opcode_t opcode = *(opcode_t*)ef->getCodePtr(ip++);
+		handle(opcode);
 	} while (exit == CONTINUE_EXIT_CODE && ip < ef->code->len);
 	
 	return std::max(0, exit);
 }
+
