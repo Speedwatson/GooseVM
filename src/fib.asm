@@ -3,7 +3,7 @@
 __start:
 	push q 1
 	push q 1
-	inp b n
+	inp b *n
 
 	jmp cycle
 
@@ -17,10 +17,10 @@ cycle:
 	; decreasing n
 	push b *n
 	dec
-	pop b n
+	pop b *n
 
 	; calculating the next pair
-	sav q t
+	sav q *t
 	add
 	push q *t
 	swp
@@ -35,4 +35,3 @@ answer:
 [section __data]
 n:	resb 1
 t:	resq 1
-
