@@ -18,8 +18,9 @@ input:
 			dec	; --len;
 
 			; arr[len] = int(input())
-			sav d len
-			inp w arr[*len] ; arr[*len] is ofs16 = arr + *len
+			dpl
+			push &arr
+			inp w *(pop) ; ofs16 = arr + pop
 
 			jmp ..readchar
 

@@ -1,0 +1,129 @@
+            <==============================O
+            |   GOOSE ARCHITECTURE v4.0    |
+            |            __                |
+            |          >(' )               |
+            |            )/    ~           |
+            |           /(____/\           |
+            |          /        )          |
+            |          \ `  =~~/           |
+            |           `-----|            |
+            |        - - -  ~~^  - -       |
+            +------------------------------+
+            | INSTRUCTION SET DESCRIPTION  |
+            +------------------------------+
+
+/* -------------- STACK INSTRUCTIONS -------------- */
+
+PUSH
+push <type: b/w/d/q> <[*]<value: plain/label> | *(pop)>
+    push b 2
+    push q 10
+    push w label    // push offset itself
+    push b *label   // push dereferenced value of label
+    push q *label   // same, but [label; label + 3] bytes involved
+    push q *(pop)   // pops the offset from the stack, and pushes back the quad by it (dereferences the top element as quad)
+
+SAV - saves the top value on stack to memory
+sav <type: b/w/d/q> < *<destination offset: plain/label> | *(pop) >
+    sav d *3        // save dword (4 bytes) starting at the 3rd byte on __data section
+    sav b *label    // label resolved to its offset
+    sav b *(pop)    // destination offset is popped from the stack (first)
+
+POP - "sav" (optionally) and discard the top value from stack
+pop [<type: b/w/d/q> < *<destination offset: plain/label> | *(pop) > ]
+    pop q *label    // same syntax as for SAV
+    pop b *(pop)    // destination offset is popped from the stack (first)
+    pop             // just discard the top value
+
+SWP - swaps two top values on the stack
+swp
+
+DPL - duplicates N top values on the stack (...[1][2] -> ...[1][2][1][2])
+dpl [imm8, def. 1]
+
+
+/* ----------- FLOW CONTROL INSTRUCTIONS ---------- */
+
+JUMP INSTRUCTIONS
+jmp
+je          jez
+jl  jle     jlz jlez
+jg  jge     lgz jgez
+
+2 operand | 1 operand and zero
+...[B][A] | ...[A]
+A < B?    | A < 0?
+
+<instr> [*]label
+    jmp label   // jump to label
+    jmp *label  // jump to offset (ofs16), stored by label
+    jmp *(pop)
+
+
+CALL
+call <ofs16 subroutineLabel> [imm8 argsNumber, def. 0]
+    call func
+    call func 2 // call func with 2 "arguments" pushed onto subroutine's stack from callers'stack (preserving order)
+// PROPOSAL - pointers to functions: call *label_storing_func_ofs [imm8]
+
+RET
+ret [imm8 valuesNumber, def. 0]
+    ret
+    ret 2       // return "2 values" to caller's stack from function's stack (tops are taken, preserving order)
+
+
+/* ----- ARITHMETIC AND BITWISE INSTRUCTIONS ------ */
+
+The following instructions operate on stack. A and B are operands.
+Before: ...[A][B]
+
+After:
+add:    ...[A + B]
+sub:    ...[A - B]
+inc:    ...[A][B + 1]
+dec:    ...[A][B - 1]
+mlt:    ...[A * B]
+div:    ...[A / B]  // integer division
+mod:    ...[A % B]
+band:   ...[A & B]
+bor:    ...[A | B]
+bxor:   ...[A ^ B]
+
+
+/* ----------- INPUT/OUTPUT INSTRUCTIONS ---------- */
+
+INP/OUT
+Syntax to these instructions is the same:
+<instr> <type: b/w/d/q/c> [ *(pop) | *<destination offset: plain/label> ]
+
+Type: b/w/d/q is an integer number types, and 'c' is used for raw byte input without any conversions:
+    times 10 inp c      // 10 raw bytes from the stdin buffer are pushed onto stack in chronological order
+
+The next token is about source/destination:
+    > lack of it means writing to the stack or reading from it:
+        inp b           // input a NUMBER (can be provided like {'1', '2', '3', '\0'}, not char) as a byte and push it on stack
+        out w           // pop a value from stack and write it to stdout as a WORD INTEGER NUMBER 
+
+    > *<destination offset: plain/label>:
+        inp q *label    // get an INTEGER NUMBER from stdin and write it as a QUADWORD by offset of label to __data section    
+        out w *label    // source offset specified, so stack isn't involved
+        out q *0x10
+
+    > *(pop) - same as previous, but offset of source/destination is popped dynamically from the stack:
+        inp w *(pop)    // input a dword and write it by OFFSET POPPED FROM STACK. brackets are mandatory.
+
+
+/* -------- SYSTEM INSTRUCTIONS AND OTHER -------- */
+
+NOP
+Do nothing
+
+BRK
+Dynamically trigger a breakpoint for debug purposes.
+
+STOP
+stop [ *(pop) | <imm8 exitCode, def. 0> ]
+Stop with specified exit code
+    stop        // exit code = 0
+    stop 3      // exit code = 3
+    stop *(pop) // exit code is the top value on stack
