@@ -26,7 +26,8 @@ private:
 		return *(T*)ptr;
 	}
 
-	uint8_t mask(opcode_t opcode, int begin, int len) { return (opcode >> (sizeof(opcode) - begin - len)) & ((1 << len) - 1); }
+	uint8_t mask(opcode_t opcode, int begin, int len) { return (opcode >> (sizeof(opcode) * 8 - begin - len)) & ((1 << len) - 1); }
+	int getLine(int ip = -1);
 
 	enum valtype_t {
 		vtB = 0b00,
@@ -47,7 +48,7 @@ private:
 	template<typename T>
 	void mem_to_stack(bool plain, bool deref) {
 		if (plain) stack.push(read<T>(ef->getCodePtr(ip)));
-		else stack.push(read<T>(ef->getDataPtr(getValOfs(deref)));
+		else stack.push(read<T>(ef->getDataPtr(getValOfs(deref)), false));
 	}
 
 	template<typename T>
@@ -65,9 +66,9 @@ private:
 	void jump_if_unary(bool (function)(val_t), ofs16_t targetOfs);
 
 	template<typename T>
-	void input(bool deref, bool forced_num = false) {
+	void input(bool to_stack, bool deref, bool forced_num = false) {
 		imm64_t valnum;
-		T val;
+		T val; 
 
 		if (forced_num) {
 			std::cin >> valnum;
@@ -75,29 +76,38 @@ private:
 		}
 		else std::cin >> val;
 		
-		ofs16_t destOfs;
-		if (deref) destOfs = read<ofs16_t>(ef->getCodePtr(ip));
+		if (to_stack) stack.push(val);
 		else {
-			destOfs = stack.top();
-			stack.pop();
+			ofs16_t destOfs;
+			if (deref) destOfs = read<ofs16_t>(ef->getCodePtr(ip));
+			else {
+				destOfs = stack.top();
+				stack.pop();
+			}
+
+			*(T*)ef->getDataPtr(destOfs) = val;
 		}
-		
-		*(T*)ef->getDataPtr(destOfs) = val;
 	}
 
 	template<typename T>
-	void output(bool deref, bool forced_num = false) {
+	void output(bool from_stack, bool deref, bool forced_num = false) {
 		imm64_t valnum;
 		T val;
 
-		if (!deref) {
+		if (!from_stack) {
+			ofs16_t destOfs;
+			if (!deref) {
+				destOfs = stack.top();
+				stack.pop();
+			}
+			else destOfs = read<ofs16_t>(ef->getCodePtr(ip));
+			val = *(T*)ef->getDataPtr(destOfs);
+		}
+		else {
 			val = stack.top();
 			stack.pop();
 		}
-		else {
-			ofs16_t destOfs = read<ofs16_t>(ef->getCodePtr(ip));
-			val = *(T*)ef->getDataPtr(destOfs);
-		}
+		
 
 		if (forced_num) {
 			valnum = val;
@@ -141,102 +151,102 @@ private:
 		/* 1D */ nullptr,
 		/* 1E */ nullptr,
 		/* 1F */ nullptr,
-		/* 20 */ nullptr,
-		/* 21 */ nullptr,
-		/* 22 */ nullptr,
-		/* 23 */ nullptr,
-		/* 24 */ nullptr,
-		/* 25 */ nullptr,
-		/* 26 */ nullptr,
-		/* 27 */ nullptr,
-		/* 28 */ nullptr,
-		/* 29 */ nullptr,
-		/* 2A */ nullptr,
-		/* 2B */ nullptr,
-		/* 2C */ nullptr,
-		/* 2D */ nullptr,
-		/* 2E */ nullptr,
-		/* 2F */ nullptr,
-		/* 30 */ nullptr,
-		/* 31 */ nullptr,
-		/* 32 */ nullptr,
-		/* 33 */ nullptr,
-		/* 34 */ nullptr,
-		/* 35 */ nullptr,
-		/* 36 */ nullptr,
-		/* 37 */ nullptr,
-		/* 38 */ nullptr,
-		/* 39 */ nullptr,
-		/* 3A */ nullptr,
-		/* 3B */ nullptr,
-		/* 3C */ nullptr,
-		/* 3D */ nullptr,
-		/* 3E */ nullptr,
-		/* 3F */ nullptr,
-		/* 40 */ nullptr,
-		/* 41 */ nullptr,
-		/* 42 */ nullptr,
-		/* 43 */ nullptr,
-		/* 44 */ nullptr,
-		/* 45 */ nullptr,
-		/* 46 */ nullptr,
-		/* 47 */ nullptr,
-		/* 48 */ nullptr,
-		/* 49 */ nullptr,
-		/* 4A */ nullptr,
-		/* 4B */ nullptr,
-		/* 4C */ nullptr,
-		/* 4D */ nullptr,
-		/* 4E */ nullptr,
-		/* 4F */ nullptr,
-		/* 50 */ &Machine::add,
-		/* 51 */ &Machine::add,
-		/* 52 */ &Machine::inc,
-		/* 53 */ &Machine::inc,
-		/* 54 */ &Machine::mlt,
-		/* 55 */ &Machine::mlt,
-		/* 56 */ &Machine::mod,
-		/* 57 */ &Machine::band,
-		/* 58 */ &Machine::bor,
-		/* 59 */ &Machine::bxor,
-		/* 5A */ nullptr,
-		/* 5B */ nullptr,
-		/* 5C */ nullptr,
-		/* 5D */ nullptr,
-		/* 5E */ nullptr,
-		/* 5F */ nullptr,
-		/* 60 */ &Machine::io,
-		/* 61 */ &Machine::io,
-		/* 62 */ &Machine::io,
-		/* 63 */ &Machine::io,
-		/* 64 */ &Machine::io,
-		/* 65 */ &Machine::io,
-		/* 66 */ &Machine::io,
-		/* 67 */ &Machine::io,
-		/* 68 */ &Machine::io,
-		/* 69 */ &Machine::io,
-		/* 6A */ &Machine::io,
-		/* 6B */ &Machine::io,
-		/* 6C */ &Machine::io,
-		/* 6D */ &Machine::io,
-		/* 6E */ &Machine::io,
-		/* 6F */ &Machine::io,
-		/* 70 */ &Machine::io,
-		/* 71 */ &Machine::io,
-		/* 72 */ &Machine::io,
-		/* 73 */ &Machine::io,
-		/* 74 */ &Machine::io,
-		/* 75 */ &Machine::io,
-		/* 76 */ &Machine::io,
-		/* 77 */ &Machine::io,
-		/* 78 */ &Machine::io,
-		/* 79 */ &Machine::io,
-		/* 7A */ &Machine::io,
-		/* 7B */ &Machine::io,
-		/* 7C */ &Machine::io,
-		/* 7D */ &Machine::io,
-		/* 7E */ &Machine::io,
-		/* 7F */ &Machine::io,
+		/* 20 */ &Machine::inp,
+		/* 21 */ &Machine::inp,
+		/* 22 */ &Machine::inp,
+		/* 23 */ &Machine::inp,
+		/* 24 */ &Machine::inp,
+		/* 25 */ &Machine::inp,
+		/* 26 */ &Machine::inp,
+		/* 27 */ &Machine::inp,
+		/* 28 */ &Machine::inp,
+		/* 29 */ &Machine::inp,
+		/* 2A */ &Machine::inp,
+		/* 2B */ &Machine::inp,
+		/* 2C */ &Machine::inp,
+		/* 2D */ &Machine::inp,
+		/* 2E */ &Machine::inp,
+		/* 2F */ &Machine::inp,
+		/* 30 */ &Machine::inp,
+		/* 31 */ &Machine::inp,
+		/* 32 */ &Machine::inp,
+		/* 33 */ &Machine::inp,
+		/* 34 */ &Machine::inp,
+		/* 35 */ &Machine::inp,
+		/* 36 */ &Machine::inp,
+		/* 37 */ &Machine::inp,
+		/* 38 */ &Machine::inp,
+		/* 39 */ &Machine::inp,
+		/* 3A */ &Machine::inp,
+		/* 3B */ &Machine::inp,
+		/* 3C */ &Machine::inp,
+		/* 3D */ &Machine::inp,
+		/* 3E */ &Machine::inp,
+		/* 3F */ &Machine::inp,
+		/* 40 */ &Machine::out,
+		/* 41 */ &Machine::out,
+		/* 42 */ &Machine::out,
+		/* 43 */ &Machine::out,
+		/* 44 */ &Machine::out,
+		/* 45 */ &Machine::out,
+		/* 46 */ &Machine::out,
+		/* 47 */ &Machine::out,
+		/* 48 */ &Machine::out,
+		/* 49 */ &Machine::out,
+		/* 4A */ &Machine::out,
+		/* 4B */ &Machine::out,
+		/* 4C */ &Machine::out,
+		/* 4D */ &Machine::out,
+		/* 4E */ &Machine::out,
+		/* 4F */ &Machine::out,
+		/* 50 */ &Machine::out,
+		/* 51 */ &Machine::out,
+		/* 52 */ &Machine::out,
+		/* 53 */ &Machine::out,
+		/* 54 */ &Machine::out,
+		/* 55 */ &Machine::out,
+		/* 56 */ &Machine::out,
+		/* 57 */ &Machine::out,
+		/* 58 */ &Machine::out,
+		/* 59 */ &Machine::out,
+		/* 5A */ &Machine::out,
+		/* 5B */ &Machine::out,
+		/* 5C */ &Machine::out,
+		/* 5D */ &Machine::out,
+		/* 5E */ &Machine::out,
+		/* 5F */ &Machine::out,
+		/* 60 */ &Machine::add,
+		/* 61 */ &Machine::add,
+		/* 62 */ &Machine::inc,
+		/* 63 */ &Machine::inc,
+		/* 64 */ &Machine::mlt,
+		/* 65 */ &Machine::mlt,
+		/* 66 */ &Machine::mod,
+		/* 67 */ &Machine::band,
+		/* 68 */ &Machine::bor,
+		/* 69 */ &Machine::bxor,
+		/* 6A */ nullptr,
+		/* 6B */ nullptr,
+		/* 6C */ nullptr,
+		/* 6D */ nullptr,
+		/* 6E */ nullptr,
+		/* 6F */ nullptr,
+		/* 70 */ nullptr,
+		/* 71 */ nullptr,
+		/* 72 */ nullptr,
+		/* 73 */ nullptr,
+		/* 74 */ nullptr,
+		/* 75 */ nullptr,
+		/* 76 */ nullptr,
+		/* 77 */ nullptr,
+		/* 78 */ nullptr,
+		/* 79 */ nullptr,
+		/* 7A */ nullptr,
+		/* 7B */ nullptr,
+		/* 7C */ nullptr,
+		/* 7D */ nullptr,
+		/* 7E */ nullptr,
+		/* 7F */ nullptr,
 		/* 80 */ &Machine::jmp_if,
 		/* 81 */ &Machine::jmp_if,
 		/* 82 */ &Machine::jmp_if,
@@ -303,7 +313,7 @@ private:
 		/* BF */ nullptr,
 		/* C0 */ &Machine::swp,
 		/* C1 */ &Machine::dpl,
-		/* C2 */ nullptr,
+		/* C2 */ &Machine::pop_discard,
 		/* C3 */ nullptr,
 		/* C4 */ nullptr,
 		/* C5 */ nullptr,
@@ -377,7 +387,8 @@ private:
 	void band(opcode_t opcode);
 	void bor(opcode_t opcode);
 	void bxor(opcode_t opcode);
-	void io(opcode_t opcode);
+	void inp(opcode_t opcode);
+	void out(opcode_t opcode);
 	void jmp_if(opcode_t opcode);
 	void jmp_if_equal(opcode_t opcode);
 	void jmp(opcode_t opcode);
@@ -387,5 +398,6 @@ private:
 	void dpl(opcode_t opcode);
 	void push(opcode_t opcode);
 	void top(opcode_t opcode);
+	void pop_discard(opcode_t opcode);
 };
 

@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
 		ExecutableFile execfile(argvec[0]);
 		
 		int excode = machine.run(&execfile);
-		return excode;
+			return excode;
 
 		/*
 			TODO:

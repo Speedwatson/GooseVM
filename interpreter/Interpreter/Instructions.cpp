@@ -18,25 +18,31 @@ void Machine::stop(opcode_t opcode) {
 }
 
 void Machine::push(opcode_t opcode) {
+	bool plain = mask(opcode, 4, 1);
+	bool deref = !mask(opcode, 5, 1);
 	valtype_t type = (valtype_t)mask(opcode, 6, 2);
-	switch (type)
-	{
-	case Machine::vtB: mem_to_stack<imm8_t>(mask(opcode, 5, 1), mask(opcode, 6, 1)); break;
-	case Machine::vtW: mem_to_stack<imm16_t>(mask(opcode, 5, 1), mask(opcode, 6, 1)); break;
-	case Machine::vtD: mem_to_stack<imm32_t>(mask(opcode, 5, 1), mask(opcode, 6, 1)); break;
-	case Machine::vtQ: mem_to_stack<imm64_t>(mask(opcode, 5, 1), mask(opcode, 6, 1)); break;
+	switch (type) {
+		case Machine::vtB: mem_to_stack<imm8_t> (plain, deref); break;
+		case Machine::vtW: mem_to_stack<imm16_t>(plain, deref); break;
+		case Machine::vtD: mem_to_stack<imm32_t>(plain, deref); break;
+		case Machine::vtQ: mem_to_stack<imm64_t>(plain, deref); break;
 	}
 }
 
 void Machine::top(opcode_t opcode) {
+	bool plain = mask(opcode, 4, 1);
+	bool deref = !mask(opcode, 5, 1);
 	valtype_t type = (valtype_t)mask(opcode, 6, 2);
-	switch (type)
-	{
-	case Machine::vtB: stack_to_mem<imm8_t>(mask(opcode, 5, 1), mask(opcode, 6, 1)); break;
-	case Machine::vtW: stack_to_mem<imm16_t>(mask(opcode, 5, 1), mask(opcode, 6, 1)); break;
-	case Machine::vtD: stack_to_mem<imm32_t>(mask(opcode, 5, 1), mask(opcode, 6, 1)); break;
-	case Machine::vtQ: stack_to_mem<imm64_t>(mask(opcode, 5, 1), mask(opcode, 6, 1)); break;
+	switch (type) {
+		case Machine::vtB: stack_to_mem<imm8_t> (plain, deref); break;
+		case Machine::vtW: stack_to_mem<imm16_t>(plain, deref); break;
+		case Machine::vtD: stack_to_mem<imm32_t>(plain, deref); break;
+		case Machine::vtQ: stack_to_mem<imm64_t>(plain, deref); break;
 	}
+}
+
+void Machine::pop_discard(opcode_t opcode) {
+	stack.pop();
 }
 
 void Machine::swp(opcode_t opcode) {
@@ -58,6 +64,7 @@ void Machine::dpl(opcode_t opcode) {
 		stack.pop();
 	}
 
+	for (auto& val : vals) stack.push(val);
 	for (auto& val : vals) stack.push(val);
 }
 
@@ -91,14 +98,14 @@ void Machine::jmp_if(opcode_t opcode) {
 	bool deref = mask(opcode, 4, 1);
 	switch (mask(opcode, 5, 3)) // zero and comparator
 	{
-		case 0b000: jump_if([](val_t top, val_t pretop) -> bool { return top > pretop; }, getJumpTargetOfs(plain, deref));
-		case 0b001: jump_if([](val_t top, val_t pretop) -> bool { return top >= pretop; }, getJumpTargetOfs(plain, deref));
-		case 0b010: jump_if([](val_t top, val_t pretop) -> bool { return top < pretop; }, getJumpTargetOfs(plain, deref));
-		case 0b011: jump_if([](val_t top, val_t pretop) -> bool { return top <= pretop; }, getJumpTargetOfs(plain, deref));
-		case 0b100: jump_if_unary([](val_t top) -> bool { return top > 0; }, getJumpTargetOfs(plain, deref));
-		case 0b101: jump_if_unary([](val_t top) -> bool { return top >= 0; }, getJumpTargetOfs(plain, deref));
-		case 0b110: jump_if_unary([](val_t top) -> bool { return top < 0; }, getJumpTargetOfs(plain, deref));
-		case 0b111: jump_if_unary([](val_t top) -> bool { return top <= 0; }, getJumpTargetOfs(plain, deref));
+		case 0b000: jump_if([](val_t top, val_t pretop) -> bool { return top > pretop; }, getJumpTargetOfs(plain, deref)); break;
+		case 0b001: jump_if([](val_t top, val_t pretop) -> bool { return top >= pretop; }, getJumpTargetOfs(plain, deref)); break;
+		case 0b010: jump_if([](val_t top, val_t pretop) -> bool { return top < pretop; }, getJumpTargetOfs(plain, deref)); break;
+		case 0b011: jump_if([](val_t top, val_t pretop) -> bool { return top <= pretop; }, getJumpTargetOfs(plain, deref)); break;
+		case 0b100: jump_if_unary([](val_t top) -> bool { return top > 0; }, getJumpTargetOfs(plain, deref)); break;
+		case 0b101: jump_if_unary([](val_t top) -> bool { return top >= 0; }, getJumpTargetOfs(plain, deref)); break;
+		case 0b110: jump_if_unary([](val_t top) -> bool { return top < 0; }, getJumpTargetOfs(plain, deref)); break;
+		case 0b111: jump_if_unary([](val_t top) -> bool { return top <= 0; }, getJumpTargetOfs(plain, deref)); break;
 	}
 }
 
@@ -130,7 +137,7 @@ void Machine::jump_if_unary(bool (function)(val_t), ofs16_t targetOfs) {
 }
 
 void Machine::call(opcode_t opcode) {
-	imm8_t argsNumber = read<imm8_t>(ef->getCodePtr(++ip));
+	imm8_t argsNumber = read<imm8_t>(ef->getCodePtr(ip));
 	ofs16_t targetOfs = read<ofs16_t>(ef->getCodePtr(ip));
 
 	std::vector<val_t> args(argsNumber);
@@ -139,7 +146,8 @@ void Machine::call(opcode_t opcode) {
 		stack.pop();
 	}
 	
-	// for (auto entry : args) stack.push(entry); // POPPING caller's arguments on its stack by default - use dpl to save them
+	// POPPING caller's arguments on its stack by default - use dpl to save them
+	// for (auto entry : args) stack.push(entry); 
 	
 	stack.push(ip);
 	stack.push(csz);
@@ -156,7 +164,7 @@ void Machine::ret(opcode_t opcode) {
 		return;
 	}
 
-	imm8_t argsNumber = read<imm8_t>(ef->getCodePtr(++ip));
+	imm8_t argsNumber = read<imm8_t>(ef->getCodePtr(ip));
 
 	if (stack.size() < csz + argsNumber) {
 		assert(false);
@@ -196,7 +204,7 @@ void Machine::inc(opcode_t opcode) {
 	stack.pop();
 
 	if (mask(opcode, 7, 1)) stack.push(top - 1);
-	else stack.push(top - 1);
+	else stack.push(top + 1);
 }
 
 void Machine::mlt(opcode_t opcode) {
@@ -240,34 +248,38 @@ void Machine::bxor(opcode_t opcode) {
 	stack.push(top ^ pretop);
 }
 
-void Machine::io(opcode_t opcode) {
-	bool mode_out = mask(opcode, 3, 1);
+void Machine::inp(opcode_t opcode) {
+	bool to_stack = mask(opcode, 3, 1);
 	bool as_char = mask(opcode, 4, 1);
 	bool deref = mask(opcode, 5, 1);
 	valtype_t type = (valtype_t)mask(opcode, 6, 2);
 
-	if (mode_out) {
-		if (as_char) output<char>(deref);
-		else {
-			switch (type)
-			{
-			case Machine::vtB: output<imm8_t>(deref, true); break;
-			case Machine::vtW: output<imm16_t>(deref); break;
-			case Machine::vtD: output<imm32_t>(deref); break;
-			case Machine::vtQ: output<imm64_t>(deref); break;
-			}
+	if (as_char) input<char>(to_stack, deref);
+	else {
+		switch (type)
+		{
+		case Machine::vtB: input<imm8_t>(to_stack, deref, true); break;
+		case Machine::vtW: input<imm16_t>(to_stack, deref); break;
+		case Machine::vtD: input<imm32_t>(to_stack, deref); break;
+		case Machine::vtQ: input<imm64_t>(to_stack, deref); break;
 		}
 	}
+}
+
+void Machine::out(opcode_t opcode) {
+	bool from_stack = mask(opcode, 3, 1);
+	bool as_char = mask(opcode, 4, 1);
+	bool deref = mask(opcode, 5, 1);
+	valtype_t type = (valtype_t)mask(opcode, 6, 2);
+
+	if (as_char) output<char>(from_stack, deref);
 	else {
-		if (as_char) input<char>(deref);
-		else {
-			switch (type)
-			{
-			case Machine::vtB: input<imm8_t>(deref, true); break;
-			case Machine::vtW: input<imm16_t>(deref); break;
-			case Machine::vtD: input<imm32_t>(deref); break;
-			case Machine::vtQ: input<imm64_t>(deref); break;
-			}
+		switch (type)
+		{
+		case Machine::vtB: output<imm8_t>(from_stack, deref, true); break;
+		case Machine::vtW: output<imm16_t>(from_stack, deref); break;
+		case Machine::vtD: output<imm32_t>(from_stack, deref); break;
+		case Machine::vtQ: output<imm64_t>(from_stack, deref); break;
 		}
 	}
 }

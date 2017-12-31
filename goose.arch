@@ -26,21 +26,15 @@ architecture Goose {
 		storage STACK_STORAGE[32];									/* A little-endian physical storage to serve for stack maintaining purposes: */
 																	/* [0 .. SSZ .. 15 ][ 16 .. CSZ .. 31] */
 
-//		storage SYSTEM_STORAGE[16];									/* A little-endian physical storage for system essential data: */
-																	/* [0 .. ERR .. 15] */
+		storage SYSTEM_STORAGE[16];									/* A little-endian physical storage for system essential data: */
+																	/* [0 .. IP .. 15] */
 
 		view SSZ = STACK_STORAGE[0..15];							/* A view for the current Stack Size storage */
 
 		view CSZ = STACK_STORAGE[16..31];							/* A view for the subroutine caller's stack Size storage at the entry point */
 																	/* For "main" or "root" subroutine it's -1 */
 
-//		view ERR = SYSTEM_STORAGE[0..15];							/* A view for the current error code storage */
-//
-//		/*
-//			ERROR CODES:
-//				0 - No error
-//				
-//		*/
+		view IP = SYSTEM_STORAGE[0..15];							/* A view for the current instruction's pointer storage */
 		
 	memory:
 		range mCode[0x0000..0xFFFF] {
@@ -87,8 +81,9 @@ architecture Goose {
 			stack 			= 111,
 			flowctrl		= 101,
 			jmpif 			= 100,
-			arithmetic 		= 010,										
-			io				= 011
+			arithmetic 		= 011,										
+			input			= 001,
+			output 			= 010
 		};
 
 		//<type: b/w/d/q>
@@ -126,19 +121,10 @@ architecture Goose {
 			pop		= 1
 		};
 
-		encode numOr0AndOfs sequence = alternatives {
-			num_not_defined = { 0000 0000, ofs16 as ofs },
-			defined = { imm8 as num, ofs16 as ofs }
-		};
 
 		encode numOr0 sequence = alternatives {
 			defined = { imm8 as num },
 			default = { 0000 0000 }
-		};
-
-		encode numOr1 sequence = alternatives {
-			defined = { imm8 as num },
-			default = { 0000 0001 }
 		};
 
 		/* -------------- STACK INSTRUCTIONS -------------- */
@@ -147,6 +133,7 @@ architecture Goose {
 		instruction push_by_ofs		= { efGroup.stack, 0, 0, efOfs.deref, sequence esValTypeAndOfs };
 		instruction push_by_ofs_pop = { efGroup.stack, 0, 0, efOfs.pop, sequence esValType };
 
+		instruction pop_discard  	= { 1100 0010 };
 		instruction pop_by_ofs		= { efGroup.stack, 1, 0, efOfs.deref, sequence esValTypeAndOfs};
 		instruction pop_by_ofs_pop	= { efGroup.stack, 1, 0, efOfs.pop, sequence esValType};
 
@@ -178,13 +165,23 @@ architecture Goose {
 		instruction jmp_if_deref		= { efGroup.jmpif, 0, efOfs.deref, sequence esZero, sequence esComparator, ofs16 as targetOfsVarPtr };
 		instruction jmp_if_pop			= { efGroup.jmpif, 0, efOfs.pop, sequence esZero, sequence esComparator };
 
-		instruction jmp_if_equal_plain	= { efGroup.flowctrl, 00, 1, 0, sequence esZero, ofs16 as targetLabel };
-		instruction jmp_if_equal_deref 	= { efGroup.flowctrl, 00, 0, efOfs.deref, sequence esZero, ofs16 as targetOfsVarPtr };
-		instruction jmp_if_equal_pop	= { efGroup.flowctrl, 00, 0, efOfs.pop, sequence esZero };
+		instruction jmp_if_equal_plain	= { efGroup.flowctrl, 0 0, 1, 0, sequence esZero, ofs16 as targetLabel };
+		instruction jmp_if_equal_deref 	= { efGroup.flowctrl, 0 0, 0, efOfs.deref, sequence esZero, ofs16 as targetOfsVarPtr };
+		instruction jmp_if_equal_pop	= { efGroup.flowctrl, 0 0, 0, efOfs.pop, sequence esZero };
 
-		instruction jmp_plain 			= { efGroup.flowctrl, 11 0, 1, 0, ofs16 as targetLabel };
-		instruction jmp_deref 			= { efGroup.flowctrl, 11 0, 0, efOfs.deref, ofs16 as targetOfsVarPtr };
-		instruction jmp_pop 			= { efGroup.flowctrl, 11 0, 0, efOfs.pop };
+		instruction jmp_plain 			= { efGroup.flowctrl, 0 10, 1, 0, ofs16 as targetLabel };
+		instruction jmp_deref 			= { efGroup.flowctrl, 0 10, 0, efOfs.deref, ofs16 as targetOfsVarPtr };
+		instruction jmp_pop 			= { efGroup.flowctrl, 0 10, 0, efOfs.pop };
+
+		encode numOr0AndOfs sequence = alternatives {
+			num_not_defined = { 0000 0000, ofs16 as ofs },
+			defined = { imm8 as num, ofs16 as ofs }
+		};
+
+		encode numOr1 sequence = alternatives {
+			defined = { imm8 as num },
+			default = { 0000 0001 }
+		};
 
 		instruction call 				= { efGroup.flowctrl, 0 1100, sequence numOr0AndOfs }; // numOr0AndOfs(num as argsNumber, ofs as subroutineLabel) };
 		
@@ -193,13 +190,13 @@ architecture Goose {
 
 		/* ------------ ARITHMETIC INSTRUCTIONS ----------- */
 
-		instruction add 			= { efGroup.arithmetic, 1 0000 };
-		instruction sub 			= { efGroup.arithmetic, 1 0001 };
-		instruction inc 			= { efGroup.arithmetic, 1 0010 };
-		instruction dec 			= { efGroup.arithmetic, 1 0011 };
-		instruction mlt 			= { efGroup.arithmetic, 1 0100 };
-		instruction div 			= { efGroup.arithmetic, 1 0101 };
-		instruction mod 			= { efGroup.arithmetic, 1 0110 };
+		instruction add 			= { efGroup.arithmetic, 0 0000 };
+		instruction sub 			= { efGroup.arithmetic, 0 0001 };
+		instruction inc 			= { efGroup.arithmetic, 0 0010 };
+		instruction dec 			= { efGroup.arithmetic, 0 0011 };
+		instruction mlt 			= { efGroup.arithmetic, 0 0100 };
+		instruction div 			= { efGroup.arithmetic, 0 0101 };
+		instruction mod 			= { efGroup.arithmetic, 0 0110 };
 
 
 		/* ------------- BITWISE INSTRUCTIONS ------------- */
@@ -216,20 +213,19 @@ architecture Goose {
 			out = 1
 		};
 
-		encode esCharMode sequence = alternatives {
-			number = { 0 },
-			char = { 1 }
-		};
-		
-		instruction inp_deref		= { efGroup.io, efMode.in, 0, efOfs.deref, sequence esValTypeAndOfs };
-		instruction inp_deref_char	= { efGroup.io, efMode.in, 1, efOfs.deref, 00, ofs16 as ofs};
-		instruction inp_pop			= { efGroup.io, efMode.in, 0, efOfs.pop, sequence esValType };
-		instruction inp_pop_char	= { efGroup.io, efMode.in, 1, efOfs.pop, 00 };
+		instruction inp_deref			= { efGroup.input, 0, 0, 1, sequence esValTypeAndOfs };
+		instruction inp_deref_char		= { efGroup.input, 0, 1, 1, 00, ofs16 as ofs};
+		instruction inp_pop				= { efGroup.input, 0, 0, 0, sequence esValType };
+		instruction inp_pop_char		= { efGroup.input, 0, 1, 0, 00 };
+		instruction inp_stack 			= { efGroup.input, 1, 0, 0, sequence esValType  };
+		instruction inp_stack_char 		= { efGroup.input, 1, 1, 000 };
 
-		instruction out_deref		= { efGroup.io, efMode.out, 0, efOfs.deref, sequence esValTypeAndOfs };
-		instruction out_deref_char	= { efGroup.io, efMode.out, 1, efOfs.deref, 00, ofs16 as ofs };
-		instruction out_pop			= { efGroup.io, efMode.out, 0, efOfs.pop, sequence esValType };
-		instruction out_pop_char	= { efGroup.io, efMode.out, 1, efOfs.pop, 00 };
+		instruction out_deref			= { efGroup.output, 0, 0, 1, sequence esValTypeAndOfs };
+		instruction out_deref_char		= { efGroup.output, 0, 1, 1, 00, ofs16 as ofs };
+		instruction out_pop				= { efGroup.output, 0, 0, 0, sequence esValType };
+		instruction out_pop_char		= { efGroup.output, 0, 1, 0, 00 };
+		instruction out_stack 			= { efGroup.output, 1, 0, 0, sequence esValType };
+		instruction out_stack_char 		= { efGroup.output, 1, 1, 000 };
 
 		/* -------------- OTHER INSTRUCTIONS -------------- */
 
@@ -248,6 +244,11 @@ architecture Goose {
 		format arg_plain is "{1}";
 		format arg_dereference is "*{1}";
 		format arg_pop is "*(pop)";
+
+		format argValType 		of	() "b" 	when bt,
+									() "w" 	when wt,
+									() "d" 	when dt,
+									() "q" 	when qt;
 
 		format argPlainNumAndVal of (num) "b {1}" 	when bval,
 									(num) "w {1}" 	when wval,
@@ -275,7 +276,8 @@ architecture Goose {
 							for push_by_ofs_pop	(...) argPopOfsAndVal;
 
 		mnemonic pop 		for pop_by_ofs 		(...) argDerefOfsAndVal,
-							for pop_by_ofs_pop 	(...) argPopOfsAndVal;
+							for pop_by_ofs_pop 	(...) argPopOfsAndVal,
+							for pop_discard 	();
 
 		mnemonic sav 		for sav_by_ofs 		(...) argDerefOfsAndVal,
 							for sav_by_ofs_pop	(...) argPopOfsAndVal;
@@ -359,12 +361,16 @@ architecture Goose {
 		mnemonic inp 	for inp_deref (...) argDerefOfsAndVal,
 						for inp_deref_char (ofs) "c *{1}",
 						for inp_pop (...) argPopOfsAndVal,
-						for inp_pop_char () "c *(pop)";
+						for inp_pop_char () "c *(pop)",
+						for inp_stack (...) argValType,
+						for inp_stack_char () "c";
 
 		mnemonic out 	for out_deref (...) argDerefOfsAndVal,
 						for out_deref_char (ofs) "c *{1}",
 						for out_pop (...) argPopOfsAndVal,
-						for out_pop_char () "c *(pop)";
+						for out_pop_char () "c *(pop)",
+						for out_stack (...) argValType,
+						for out_stack_char () "c";
 
 
 		/* ----------- FOR OTHER INSTRUCTIONS ------------- */
