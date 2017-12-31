@@ -38,6 +38,7 @@ io:
 		..return:
 			ret
 
+
 	.printarr:
 		push b 0 ; int i
 
@@ -190,7 +191,6 @@ merge:;(dword start, dword end):
 
 				ret
 
-
 		..endif:
 			push d *k
 			inc
@@ -262,7 +262,9 @@ utils:
 
 		ret 1
 
+
 [section __data]
+
 len: 	resd 1	; LEN(gth) has type of DWORD, so the array can have up to 0x10000 elements
 start: 	resd 1
 end: 	resd 1
