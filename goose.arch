@@ -380,10 +380,7 @@ architecture Goose {
 						() when default,
 						for stop_ecstack () "*(pop)";
 
+        // cpy: copy value from constants to data
+
 		mnemonic brk	();
-
-
-		// cpy: copy value from constants to data
-
-		// cmp -> -1 0 1
 }

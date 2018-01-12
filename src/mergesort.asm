@@ -1,3 +1,19 @@
+[section __data]
+
+len:    resd 1
+start:  resd 1
+end:    resd 1
+
+i:      resd 1  
+j:      resd 1
+k:      resd 1
+secstart: resd 1
+
+; We have 2^15 addressable elements (word is signed). 28 out of them should be reserved for the values mentioned above.
+; If we divide the rest between two arrays, we get 16370.
+arr: resw 16370  
+arrm: resw 16370   
+
 [section __code]
 
 __start:
@@ -28,9 +44,9 @@ io:
 			dpl
 			push b 2
 			mlt	; i *= sizeof(word) to calculate offset in bytes
-			push w arr ; pushing OFFSET
+			push w arr ; pushing OFFSET of arr ("&arr")
 			add
-			inp w *(pop) ; destOfs = (*(sav) arr ADD) in Reverse Polish Notation
+			inp w *(pop) ; destOfs = (*(pop) arr ADD) in Reverse Polish Notation
 
 			inc	; ++i;
 			jmp io.readarr.readchar
@@ -40,7 +56,7 @@ io:
 
 
 	.printarr:
-		push b 0 ; int i
+		push b 0 ; byte i = 0
 
 		..printchar:
 			; while i != len
@@ -262,22 +278,6 @@ utils:
 
 		ret 1
 
-
-[section __data]
-
-len: 	resd 1	; LEN(gth) has type of DWORD, so the array can have up to 0x10000 elements
-start: 	resd 1
-end: 	resd 1
-
-i:		resd 1	
-j:		resd 1
-k:		resd 1
-secstart: resd 1
-
-; We have 2^15 addresses (word is signed). 28 from them should be reserved for the values mentioned above.
-; If we divide the rest of addresses between two arrays, we get 16370.
-arr: resw 16370  
-arrm: resw 16370   
 
 ; Mistakes I made during writing of this algorithm:
 ; 	1) Missing dereference when it's needed - be careful to the asterisk when pushing/popping stuff. Consider it every time you write a label.

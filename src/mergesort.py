@@ -2,8 +2,10 @@ import random
 arr = list(range(int(input())))
 random.shuffle(arr)
 
+
 n = len(arr)
 b = [0 for i in range(n)]
+
 
 def mid(start, end):
     return start + (end - start) // 2
@@ -20,6 +22,7 @@ def merge_sort(start, end):
     merge_sort(mid(start, end) + 1, end)
 
     merge(start, end)
+
 
 def merge(start, end):
     print("merging", repr(arr[start : start + (end - start) // 2 + 1]), "and", repr(arr[start + (end - start) // 2 + 1 : end + 1]))

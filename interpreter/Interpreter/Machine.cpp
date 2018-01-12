@@ -2,6 +2,8 @@
 #include "Exceptions.hpp"
 #include "Machine.hpp"
 
+// Debug-related lines and functions are commented out here
+
 int Machine::run(ExecutableFile* execfile) {
 	ef = execfile;
 	ip = ef->start;	
@@ -11,7 +13,7 @@ int Machine::run(ExecutableFile* execfile) {
 
 	// std::vector<size_t> coverage(ef->sourceTextRanges.back().line + 1, 0);
 	
-	int line;
+	//int line;
 	do {
 		// line = getLine();
 		// ++coverage[line];
@@ -22,17 +24,17 @@ int Machine::run(ExecutableFile* execfile) {
 	return std::max(0, exit);
 }
 
-int Machine::getLine(int tip) {
-	if (tip == -1) tip = ip;
-
-	int found = -1;
-	for (auto& point : ef->sourceCodePoints) {
-		if (point.address == tip) {
-			found = point.sourceOperationRangeIndex;
-			break;
-		}
-	}
-
-	return (found != -1) ? ef->sourceTextRanges[found].line : -1;
-}
+//int Machine::getLine(int tip) {
+//	if (tip == -1) tip = ip;
+//
+//	int found = -1;
+//	for (auto& point : ef->sourceCodePoints) {
+//		if (point.address == tip) {
+//			found = point.sourceOperationRangeIndex;
+//			break;
+//		}
+//	}
+//
+//	return (found != -1) ? ef->sourceTextRanges[found].line : -1;
+//}
 

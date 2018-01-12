@@ -21,13 +21,7 @@ int main(int argc, char* argv[]) {
 		ExecutableFile execfile(argvec[0]);
 		
 		int excode = machine.run(&execfile);
-			return excode;
-
-		/*
-			TODO:
-				4) Implementing Machine, machine.run(), running fib.asm
-				5) Writing merge sort
-		*/
+		return excode;
 	}
 	catch (Error& e) {
 		std::cerr << e.what();
